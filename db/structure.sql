@@ -23,6 +23,20 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
+--
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -720,6 +734,175 @@ ALTER SEQUENCE ssl_keys_id_seq OWNED BY ssl_keys.id;
 
 
 --
+-- Name: test_case_results; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_case_results (
+    id integer NOT NULL,
+    "position" integer,
+    job_id integer NOT NULL,
+    test_case_id integer NOT NULL,
+    duration integer,
+    failed_count integer,
+    success_count integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_case_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_case_results_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_case_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_case_results_id_seq OWNED BY test_case_results.id;
+
+
+--
+-- Name: test_cases; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_cases (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_cases_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_cases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_cases_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_cases_id_seq OWNED BY test_cases.id;
+
+
+--
+-- Name: test_step_data; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_step_data (
+    id integer NOT NULL,
+    message text,
+    stdout text,
+    stderr text,
+    test_step_result_id integer NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_step_data_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_step_data_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_step_data_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_step_data_id_seq OWNED BY test_step_data.id;
+
+
+--
+-- Name: test_step_results; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_step_results (
+    id bigint NOT NULL,
+    test_case_result_id integer NOT NULL,
+    test_step_id integer NOT NULL,
+    result character varying(255) NOT NULL,
+    started_at timestamp without time zone,
+    duration integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    uuid uuid DEFAULT uuid_generate_v4()
+);
+
+
+--
+-- Name: test_step_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_step_results_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_step_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_step_results_id_seq OWNED BY test_step_results.id;
+
+
+--
+-- Name: test_steps; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_steps (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    test_case_id integer NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_steps_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_steps_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_steps_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_steps_id_seq OWNED BY test_steps.id;
+
+
+--
 -- Name: tokens; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -920,6 +1103,41 @@ ALTER TABLE ONLY ssl_keys ALTER COLUMN id SET DEFAULT nextval('ssl_keys_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY test_case_results ALTER COLUMN id SET DEFAULT nextval('test_case_results_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_cases ALTER COLUMN id SET DEFAULT nextval('test_cases_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_step_data ALTER COLUMN id SET DEFAULT nextval('test_step_data_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_step_results ALTER COLUMN id SET DEFAULT nextval('test_step_results_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_steps ALTER COLUMN id SET DEFAULT nextval('test_steps_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY tokens ALTER COLUMN id SET DEFAULT nextval('tokens_id_seq'::regclass);
 
 
@@ -1055,6 +1273,46 @@ ALTER TABLE ONLY ssl_keys
 
 ALTER TABLE ONLY jobs
     ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_case_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_case_results
+    ADD CONSTRAINT test_case_results_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_cases_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_cases
+    ADD CONSTRAINT test_cases_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_step_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_step_data
+    ADD CONSTRAINT test_step_data_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_step_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_step_results
+    ADD CONSTRAINT test_step_results_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_steps_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_steps
+    ADD CONSTRAINT test_steps_pkey PRIMARY KEY (id);
 
 
 --
@@ -1268,6 +1526,48 @@ CREATE INDEX index_requests_on_repository_id ON requests USING btree (repository
 --
 
 CREATE INDEX index_ssl_key_on_repository_id ON ssl_keys USING btree (repository_id);
+
+
+--
+-- Name: index_test_case_results_on_job_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_case_results_on_job_id ON test_case_results USING btree (job_id);
+
+
+--
+-- Name: index_test_case_results_on_test_case_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_case_results_on_test_case_id ON test_case_results USING btree (test_case_id);
+
+
+--
+-- Name: index_test_step_data_on_test_step_result_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_step_data_on_test_step_result_id ON test_step_data USING btree (test_step_result_id);
+
+
+--
+-- Name: index_test_step_results_on_test_case_result_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_step_results_on_test_case_result_id ON test_step_results USING btree (test_case_result_id);
+
+
+--
+-- Name: index_test_step_results_on_test_step_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_step_results_on_test_step_id ON test_step_results USING btree (test_step_id);
+
+
+--
+-- Name: index_test_steps_on_test_case_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_steps_on_test_case_id ON test_steps USING btree (test_case_id);
 
 
 --
@@ -1576,3 +1876,13 @@ INSERT INTO schema_migrations (version) VALUES ('20150121135400');
 INSERT INTO schema_migrations (version) VALUES ('20150121135401');
 
 INSERT INTO schema_migrations (version) VALUES ('20150204144312');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501150710');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501150815');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501152049');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501152334');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501152534');

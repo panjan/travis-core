@@ -7,6 +7,13 @@ require 'core_ext/active_record/base'
 
 module Travis
   class Model < ActiveRecord::Base
+
+    class TestResultModel < Travis::Model
+      self.abstract_class = true
+      # TODO
+      # establish_connection "test_result_#{ENV['ENV'] || ENV['RAILS_ENV']}"
+    end
+
     require 'travis/model/account'
     require 'travis/model/annotation'
     require 'travis/model/annotation_provider'
@@ -27,7 +34,13 @@ module Travis
     require 'travis/model/user'
     require 'travis/model/url'
 
-    self.abstract_class = true
+    require 'travis/model/test_step'
+    require 'travis/model/test_case'
+    require 'travis/model/test_step_result'
+    require 'travis/model/test_case_result'
+    require 'travis/model/test_step_data'
+
+   self.abstract_class = true
 
     cattr_accessor :follower_connection_handler
 
