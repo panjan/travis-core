@@ -100,6 +100,13 @@ module Travis
           end
 
           def owner_by_payload
+            # FIXME - HACK: allow to run build even if you do not own i
+            # repository. It is very unsecure feaure - which removes
+            # authenication and authorization
+            # ...this also breaks a lot of test in
+            # ./spec/travis/requests/services/receive_spec.rb
+            return User.first if ENV['TRAVIS_SECURE_ENVIRONMENT']
+
             if id = payload.repository[:owner_id]
               lookup_owner(payload.repository[:owner_type], id: id)
             elsif github_id = payload.repository[:owner_github_id]
