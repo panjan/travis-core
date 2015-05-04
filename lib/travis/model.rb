@@ -14,6 +14,8 @@ module Travis
       # establish_connection "test_result_#{ENV['ENV'] || ENV['RAILS_ENV']}"
     end
 
+    require 'travis/model/repository_provider'
+
     require 'travis/model/account'
     require 'travis/model/annotation'
     require 'travis/model/annotation_provider'
