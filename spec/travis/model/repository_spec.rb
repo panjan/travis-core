@@ -205,6 +205,18 @@ describe Repository do
         repo.source_url.should == 'git@localhost:travis-ci/travis-ci.git'
       end
     end
+
+    describe 'custom source stash endpoint' do
+     let(:repo) { Repository.new(owner_name: 'travis-ci', name: 'travis-ci', provider: 'stash') }
+
+     before :each do
+       Travis.config.stash = { source_host: 'stash.example.com' }
+     end
+
+     it 'returns stash repository' do
+       repo.source_url.should == 'git@stash.example.com:projects/travis-ci/repos/travis-ci.git'
+     end
+    end
   end
 
   describe 'source_host' do

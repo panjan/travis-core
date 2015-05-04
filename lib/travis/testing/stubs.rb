@@ -27,8 +27,17 @@ module Travis
             let(:broadcast)           { stub_broadcast           }
             let(:travis_token)        { stub_travis_token        }
             let(:cache)               { stub_cache               }
+            let(:repository_provider) { stub_github_repo_provider }
           end
         end
+      end
+
+      def stub_github_repo_provider(attributes = {})
+        r = Stubs.stub 'github_provider', attributes.reverse_merge(
+          source_url: 'git://github.com/svenfuchs/minimal.git',
+          config_url: 'https://api.github.com/repos/svenfuchs/minimal/contents/.travis.yml?ref=62aae5f70ceee39123ef',
+          source_host: 'github.com'
+        )
       end
 
       def stub_repo(attributes = {})
@@ -43,6 +52,7 @@ module Travis
           slug: 'svenfuchs/minimal',
           description: 'the repo description',
           url: 'http://github.com/svenfuchs/minimal',
+          repository_provider: repository_provider,
           source_url: 'git://github.com/svenfuchs/minimal.git',
           api_url: 'https://api.github.com/repos/svenfuchs/minimal',
           key: stub_key,
@@ -93,6 +103,8 @@ module Travis
           pull_request?: false,
           comments_url: 'http://github.com/path/to/comments',
           config_url: 'https://api.github.com/repos/svenfuchs/minimal/contents/.travis.yml?ref=62aae5f70ceee39123ef',
+          repository_provider: repository_provider,
+          fetch_config_content: 'foo: Foo',
           result: :accepted,
           created_at: DateTime.new(2013, 01, 01, 0, 0, 0),
           owner_type: 'User',
@@ -104,7 +116,8 @@ module Travis
           tag_name: '',
           pull_request: false,
           pull_request_title: nil,
-          pull_request_number: nil
+          pull_request_number: nil,
+          payload: nil
         )
       end
 

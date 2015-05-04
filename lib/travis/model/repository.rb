@@ -110,16 +110,22 @@ class Repository < Travis::Model
     "#{Travis.config.github.api_url}/repos/#{slug}"
   end
 
-  def source_url
-    (private? || private_mode?) ? "git@#{source_host}:#{slug}.git": "git://#{source_host}/#{slug}.git"
+  def repository_provider
+    @repository_provider ||= begin
+      self.provider ||= 'github'
+
+      providerClassName = provider.capitalize + 'Provider'
+      providerClassName.constantize.new(self)
+    end
+    @repository_provider
   end
 
-  def private_mode?
-    source_host != 'github.com'
+  def source_url
+    repository_provider.source_url
   end
 
   def source_host
-    Travis.config.github.source_host || 'github.com'
+    repository_provider.source_host
   end
 
   def branches

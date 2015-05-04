@@ -37,16 +37,9 @@ module Travis
 
         private
 
-          def fetch
-            content = GH[config_url]['content']
-            Travis.logger.warn("[request:fetch_config] Empty content for #{config_url}") if content.nil?
-            content = content.to_s.unpack('m').first
-            Travis.logger.warn("[request:fetch_config] Empty unpacked content for #{config_url}, content was #{content.inspect}") if content.nil?
-            nbsp = "\xC2\xA0".force_encoding("binary")
-            content = content.gsub(/^(#{nbsp})+/) { |match| match.gsub(nbsp, " ") }
-
-            content
-          end
+        def fetch
+          request.fetch_config_content
+        end
 
           def parse(yaml)
             YAML.load(yaml).merge('.result' => 'configured')

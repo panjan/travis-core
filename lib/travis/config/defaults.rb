@@ -22,6 +22,7 @@ module Travis
             smtp:          {},
             email:         {},
             github:        { api_url: 'https://api.github.com', token: 'travisbot-token' },
+            stash:         { source_host: 'stash.yourcompany.com' },
             async:         {},
             notifications: [], # TODO rename to event.handlers
             metrics:       { reporter: 'librato' },
