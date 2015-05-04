@@ -1,9 +1,12 @@
 require 'spec_helper'
 
 describe Travis::Github::Services::FetchConfig do
-  include Travis::Testing::Stubs, Support::Redis
+  include Support::Redis
+  include Support::ActiveRecord
 
   let(:body)      { { 'content' => ['foo: Foo'].pack('m') } }
+  let(:repo)      { Factory(:repository, :owner_name => 'travis-ci', :name => 'travis-core') }
+  let!(:request)  { Factory(:request, :repository => repo) }
   let(:service)   { described_class.new(nil, request: request) }
   let(:result)    { service.run }
   let(:exception) { GH::Error.new }

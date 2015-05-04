@@ -41,6 +41,8 @@ class Request < Travis::Model
   serialize :config
   serialize :payload
 
+  delegate :repository_provider, to: :repository
+
   def event_type
     read_attribute(:event_type) || 'push'
   end
@@ -74,7 +76,11 @@ class Request < Travis::Model
   end
 
   def config_url
-    GH.full_url("repos/#{repository.slug}/contents/.travis.yml?ref=#{commit.commit}").to_s
+    repository_provider.content_url(path: '.travis.yml', ref: commit.commit)
+  end
+
+  def fetch_config_content
+    repository_provider.fetch_content(config_url)
   end
 
   def same_repo_pull_request?
