@@ -7,7 +7,7 @@ module Travis
             include Formats
 
             def data
-              {
+              res = {
                 'type' => 'test',
                 # TODO legacy. remove this once workers respond to a 'job' key
                 'build' => job_data,
@@ -21,6 +21,16 @@ module Travis
                 'env_vars' => env_vars,
                 'timeouts' => timeouts
               }
+
+              if (
+                job.source.request and
+                job.source.request.payload and
+                (script = MultiJson.decode(job.source.request.payload)['script'] rescue nil)
+              )
+                res['script'] = script
+              end
+
+              res
             end
 
             def build_data
