@@ -2,9 +2,9 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'travis-support',     github: 'finalci/travis-support'
-gem 'travis-sidekiqs',    github: 'travis-ci/travis-sidekiqs', require: nil
-gem 'gh',                 github: 'travis-ci/gh'
+gem 'travis-support',     github: 'final-ci/travis-support'
+gem 'travis-sidekiqs',    github: 'final-ci/travis-sidekiqs', require: nil
+gem 'gh',                 github: 'final-ci/gh'
 gem 'addressable'
 gem 'aws-sdk-v1'
 gem 'json', '~> 1.7.7'
