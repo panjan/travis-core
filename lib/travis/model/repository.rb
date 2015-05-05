@@ -199,6 +199,8 @@ class Repository < Travis::Model
 
   def multi_os_enabled?
     Travis::Features.enabled_for_all?(:multi_os) || Travis::Features.active?(:multi_os, self)
+    # HACK!! for now
+    true
   end
 
   def dist_group_expansion_enabled?

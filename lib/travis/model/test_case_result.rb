@@ -18,4 +18,9 @@ class TestCaseResult < Travis::Model::TestResultModel
 
   # valides :result, inlcude: [:failed, :passed, :pending]
   delegate :description, to: :test_case
+
+
+  def test_steps
+    test_step_results.to_a.map(&:test_step)
+  end
 end

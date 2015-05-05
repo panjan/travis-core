@@ -445,4 +445,19 @@ describe Job do
       job.log.content.should == 'bar'
     end
   end
+
+  it "returns environment hash" do
+    job = Factory.build(:test)
+    config = {
+      global_env: 'FOO=foobar FOO2=foobar',
+      env: 'SECURE BAR=secret FOO=foo'
+    }
+    job.config = config
+
+    result = {
+      'FOO' => 'foo',
+      'FOO2' => 'foobar'
+    }
+    job.config_vars_hash.should eq result
+  end
 end

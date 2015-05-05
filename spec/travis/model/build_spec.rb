@@ -10,6 +10,23 @@ describe Build do
     build.cached_matrix_ids.should == build.matrix_ids
   end
 
+  it 'returns matrix grouped by dimension' do
+    build = Factory.create(:build,
+      config: {
+        env: [
+          'PART=part1 MACHINE=Win7',
+          'PART=part1 MACHINE=Win8',
+          'PART=part2 MACHINE=Win7',
+          'PART=part2 MACHINE=Win8'
+        ]
+       }
+    )
+    result = build.matrix_by_dimension('PART')
+    result.keys.should eq ['part1', 'part2']
+    result['part1'].length.should eq 2
+    result['part2'].length.should eq 2
+  end
+
   it 'returns nil if cached_matrix_ids are not set' do
     build = Factory.create(:build)
     build.update_column(:cached_matrix_ids, nil)

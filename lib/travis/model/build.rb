@@ -43,10 +43,10 @@ class Build < Travis::Model
   require 'travis/model/build/metrics'
   require 'travis/model/build/result_message'
   require 'travis/model/build/states'
-  #require 'travis/model/build/test_results'
+  require 'travis/model/build/test_results'
   require 'travis/model/env_helpers'
 
-  include Matrix, States, SimpleStates #, TestResults
+  include Matrix, States, SimpleStates, EnvHelpers, TestResults
 
   belongs_to :commit
   belongs_to :request

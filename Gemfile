@@ -18,6 +18,8 @@ platform :mri do
   gem 'pg',               '~> 0.14.0'
 end
 
+gem 'diff-lcs'
+
 platform :jruby do
   gem 'jruby-openssl',    '~> 0.8.5'
   gem 'march_hare',       '~> 2.0.0'

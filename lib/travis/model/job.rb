@@ -80,6 +80,10 @@ class Job < Travis::Model
     notify(:create)
   end
 
+  def test_cases
+    test_case_results.map(&:test_case)
+  end
+
   def propagate(name, *args)
     # if we propagate cancel, we can't send it as "cancel", because
     # it would trigger cancelling the entire matrix
@@ -151,6 +155,10 @@ class Job < Travis::Model
   # compatibility, we still use result in webhooks
   def result
     state.try(:to_sym) == :passed ? 0 : 1
+  end
+
+  def config_vars_hash
+    config_global_env_hash.dup.update(config_env_hash)
   end
 
   private
