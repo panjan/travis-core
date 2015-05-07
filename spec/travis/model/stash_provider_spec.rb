@@ -11,12 +11,12 @@ describe StashProvider do
   end
 
   it '#source_url' do
-    stash_provider.source_url.should == 'git@stash.example.com:projects/travis-ci/repos/travis-ci.git'
+    stash_provider.source_url.should == 'ssh://git@stash.example.com:22/travis-ci/repos/travis-ci.git'
   end
 
   it '#content_url' do
     url = stash_provider.content_url(path: '.travis.yml', ref: 'master')
-    url.should == 'https://stash.example.com/projects/travis-ci/repos/travis-ci/browse/.travis.yml?at=master'
+    url.should == 'https://stash.example.com:443/projects/travis-ci/repos/travis-ci/browse/.travis.yml?at=master&raw'
   end
 
   it '#source_host' do
