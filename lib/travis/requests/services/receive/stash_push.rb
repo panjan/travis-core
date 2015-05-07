@@ -2,11 +2,12 @@ module Travis
   module Requests
     module Services
       class Receive < Travis::Services::Base
-        class Push
+        class StashPush
           attr_reader :event
 
           def initialize(event)
-            @event = GH.load(event)
+            #TODO - somehow fetch data about repo from stash
+            @event = event
           end
 
           def accept?
@@ -27,13 +28,10 @@ module Travis
             @repository ||= repo_data && {
               name:            repo_data['name'],
               description:     repo_data['description'],
-              url:             repo_data['_links']['html']['href'],
-              owner_github_id: repo_data['owner']['id'],
-              owner_type:      repo_data['owner']['type'],
-              owner_name:      repo_data['owner']['login'],
-              owner_email:     repo_data['owner']['email'],
+              url:             repo_data['url'],
               private:         !!repo_data['private'],
-              github_id:       repo_data['id']
+              repository_id:   repo_data['repository_id'],
+              owner_name:   repo_data['owner_name']
             }
           end
 
@@ -63,7 +61,10 @@ module Travis
             end
 
             def commit_data
-              last_unskipped_commit || commits.last || event['head_commit']
+              @commit_data ||= (last_unskipped_commit || commits.last || event['head_commit'])
+              @commit_data['committer'] ||= {}
+              @commit_data['author'] ||= {}
+              @commit_data
             end
 
             def last_unskipped_commit

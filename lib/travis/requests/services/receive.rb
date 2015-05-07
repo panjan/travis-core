@@ -12,6 +12,7 @@ module Travis
         require 'travis/requests/services/receive/api'
         require 'travis/requests/services/receive/pull_request'
         require 'travis/requests/services/receive/push'
+        require 'travis/requests/services/receive/stash_push'
 
         extend Travis::Instrumentation
 
@@ -21,7 +22,6 @@ module Travis
 
         class << self
           def payload_for(type, data)
-            data = GH.load(data)
             const_get(type.camelize).new(data)
           end
         end
