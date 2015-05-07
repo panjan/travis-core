@@ -6,7 +6,7 @@ module Travis
           attr_reader :event
 
           def initialize(event)
-            @event = event
+            @event = GH.load(event)
           end
 
           def accept?
