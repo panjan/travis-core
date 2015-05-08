@@ -9,6 +9,9 @@ describe Travis::Api::V0::Worker::Job::Test do
 
   let(:settings) do
     Repository::Settings.load({
+      'ssh_key' => {
+        'value' => Travis::Model::EncryptedColumn.new(use_prefix: false).dump('an ssh key')
+      },
       'env_vars' => [
         { 'name' => 'FOO', 'value' => foo },
         { 'name' => 'BAR', 'value' => bar, 'public' => true }
@@ -28,16 +31,31 @@ describe Travis::Api::V0::Worker::Job::Test do
       commit.stubs(:ref).returns(nil)
     end
 
+    describe 'with ssh key from config' do
+      before do
+        test.repository.settings.ssh_key = nil
+        test.stubs(:ssh_key).returns('an ssh key from config')
+      end
+
+      it 'returns source as config' do
+        data['ssh_key']['source'].should == 'config'
+        data['ssh_key']['value'].should  == 'an ssh key from config'
+      end
+    end
+
     it 'contains the expected data' do
       data.except('job', 'build', 'repository').should == {
         'type' => 'test',
         'config' => { 'rvm' => '1.8.7', 'gemfile' => 'test/Gemfile.rails-2.3.x' },
         'queue' => 'builds.linux',
         'uuid' => Travis.uuid,
-        'ssh_key' => nil,
         'source' => {
           'id' => 1,
           'number' => 2
+        },
+        'ssh_key' => {
+          'source' => 'repo_settings',
+          'value'  => 'an ssh key'
         },
         'env_vars' => [
           { 'name' => 'FOO', 'value' => 'bar', 'public' => false },
@@ -130,10 +148,13 @@ describe Travis::Api::V0::Worker::Job::Test do
         'config' => { 'rvm' => '1.8.7', 'gemfile' => 'test/Gemfile.rails-2.3.x' },
         'queue' => 'builds.linux',
         'uuid' => Travis.uuid,
-        'ssh_key' => nil,
         'source' => {
           'id' => 1,
           'number' => 2
+        },
+        'ssh_key' => {
+          'source' => 'repo_settings',
+          'value'  => 'an ssh key'
         },
         'env_vars' => [
           { 'name' => 'BAR', 'value' => 'baz', 'public' => true }
