@@ -214,7 +214,7 @@ describe Repository do
      end
 
      it 'returns stash repository' do
-       repo.source_url.should == 'ssh://git@stash.example.com:22/travis-ci/repos/travis-ci.git'
+       repo.source_url.should == 'ssh://git@stash.example.com:22/travis-ci/travis-ci.git'
      end
     end
   end
