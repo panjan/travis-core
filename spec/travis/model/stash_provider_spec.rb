@@ -11,7 +11,7 @@ describe StashProvider do
   end
 
   it '#source_url' do
-    stash_provider.source_url.should == 'ssh://git@stash.example.com:22/travis-ci/repos/travis-ci.git'
+    stash_provider.source_url.should == 'ssh://git@stash.example.com:22/travis-ci/travis-ci.git'
   end
 
   it '#content_url' do

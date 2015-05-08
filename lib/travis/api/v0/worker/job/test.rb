@@ -19,18 +19,21 @@ module Travis
                 'uuid' => Travis.uuid,
                 'ssh_key' => ssh_key,
                 'env_vars' => env_vars,
-                'timeouts' => timeouts
+                'timeouts' => timeouts,
+                'fix_resolv_conf' =>  Travis::Features.feature_active?(:fix_resolv_conf),
+                'script' => force_script
               }
-
-              if (
-                job.source.request and
-                job.source.request.payload and
-                (script = MultiJson.decode(job.source.request.payload)['script'] rescue nil)
-              )
-                res['script'] = script
-              end
-
               res
+            end
+
+            def force_script
+              force_script = build.request.payload && build.request.payload['force_script']
+
+              (force_script and
+                Travis::Features.feature_active?(:force_script) and
+                !commit.pull_request? and
+                (!job.config.has_key?(:sudo) or job.config[:sudo])
+              ) ? force_script : nil
             end
 
             def build_data

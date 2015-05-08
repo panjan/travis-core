@@ -80,7 +80,8 @@ class Request < Travis::Model
   end
 
   def fetch_config_content
-    repository_provider.fetch_content(config_url)
+    t = payload && payload['.travis.yml']
+    t ? YAML.dump(t) : repository_provider.fetch_content(config_url)
   end
 
   def same_repo_pull_request?

@@ -8,7 +8,7 @@ class StashProvider < RepositoryProvider
 
   def source_url
     "#{git_source_protocol}://git@#{source_host}:#{git_source_port}/" +
-      "#{repository.owner_name}/repos/#{repository.name}.git"
+      "#{repository.owner_name}/#{repository.name}.git"
   end
 
   def content_url(options)

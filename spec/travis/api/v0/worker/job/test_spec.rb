@@ -64,7 +64,9 @@ describe Travis::Api::V0::Worker::Job::Test do
         'timeouts' => {
           'hard_limit' => 180 * 60, # worker handles timeouts in seconds
           'log_silence' => 20 * 60
-        }
+        },
+        'fix_resolv_conf' => false,
+        'script' => nil
       }
     end
 
@@ -162,7 +164,9 @@ describe Travis::Api::V0::Worker::Job::Test do
         'timeouts' => {
           'hard_limit' => 180 * 60, # worker handles timeouts in seconds
           'log_silence' => 20 * 60
-        }
+        },
+        'fix_resolv_conf' => false,
+        'script' => nil
       }
     end
 
