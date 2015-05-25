@@ -114,8 +114,8 @@ class Repository < Travis::Model
     @repository_provider ||= begin
       self.provider ||= 'github'
 
-      providerClassName = provider.capitalize + 'Provider'
-      providerClassName.constantize.new(self)
+      provider_class_name = provider.capitalize + 'Provider'
+      provider_class_name.constantize.new(self)
     end
     @repository_provider
   end
