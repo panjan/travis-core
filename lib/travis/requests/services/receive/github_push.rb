@@ -2,7 +2,7 @@ module Travis
   module Requests
     module Services
       class Receive < Travis::Services::Base
-        class Push
+        class GithubPush
           attr_reader :event
 
           def initialize(event)

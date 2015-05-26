@@ -16,7 +16,7 @@ class Request
 
     def accepted?
       commit.present? &&
-        !repository.private? &&
+        (!repository.private? || Travis::Features.active?(:accept_private_repo, repository)) &&
         (!excluded_repository? || included_repository?) &&
         !skipped? &&
         enabled_in_settings?

@@ -1,13 +1,33 @@
+require 'stash-client'
+
 module Travis
   module Requests
     module Services
       class Receive < Travis::Services::Base
         class StashPush
-          attr_reader :event
+          attr_reader :event, :ref
 
           def initialize(event)
-            #TODO - somehow fetch data about repo from stash
-            @event = event
+            url = Travis.config.stash.api_url
+            stash_client = Stash::Client.new({url: url}.update(Travis.config.stash.connection || {}))
+
+            repo = stash_client.repository(
+              event["repository"]["project"]["key"],
+              event["repository"]["slug"]
+            )
+            @ref = event["refChange"]["refId"]
+            commits = stash_client.commits_for(
+              repo,
+              #TODO
+              # where is documentation for Stash payload?
+              # based on expediments, the array has only one element.
+              since: event["refChange"]["fromHash"],
+              :until => event["refChange"]["toHash"]
+            )
+            @event = {
+              'repository' => repo,
+              'commits' => commits,
+            }
           end
 
           def accept?
@@ -30,8 +50,10 @@ module Travis
               description:     repo_data['description'],
               url:             repo_data['url'],
               private:         !!repo_data['private'],
-              repository_id:   repo_data['repository_id'],
-              owner_name:   repo_data['owner_name']
+              repository_id:   project_data['repository_id'],
+              #TODO: provider_id:   project_data['id'],
+              type:            project_data['type'],
+              owner_name:      project_owner
             }
           end
 
@@ -41,16 +63,16 @@ module Travis
 
           def commit
             @commit ||= commit_data && {
-              commit:          commit_data['sha'],
+              commit:          commit_data['id'],
               message:         commit_data['message'],
-              branch:          event['ref'].split('/', 3).last,
-              ref:             event['ref'],
-              committed_at:    commit_data['date'],
-              committer_name:  commit_data['committer']['name'],
-              committer_email: commit_data['committer']['email'],
+              branch:          ref.split('/', 3).last,
+              ref:             ref,
+              committed_at:    Time.at(commit_data['authorTimestamp']),
+              #committer_name:  commit_data['committer']['name'],
+              #committer_email: commit_data['committer']['email'],
               author_name:     commit_data['author']['name'],
               author_email:    commit_data['author']['email'],
-              compare_url:     event['compare']
+              #compare_url:     event['compare']
             }
           end
 
@@ -58,6 +80,14 @@ module Travis
 
             def repo_data
               event['repository']
+            end
+
+            def project_data
+              repo_data['project']
+            end
+
+            def project_owner
+              project_data['owner'] && project_data['owner']['name'] || project_data['name']
             end
 
             def commit_data
