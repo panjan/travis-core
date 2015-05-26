@@ -241,7 +241,7 @@ describe Travis::Requests::Services::Receive do
     end
 
     it 'during :accept?' do
-      described_class::Push.any_instance.stubs(:validate!).raises(error)
+      described_class::GithubPush.any_instance.stubs(:validate!).raises(error)
       capture_log { request }.should include(message)
     end
 

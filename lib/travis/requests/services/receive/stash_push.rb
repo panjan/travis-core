@@ -1,13 +1,53 @@
+require 'stash-client'
+
 module Travis
   module Requests
     module Services
       class Receive < Travis::Services::Base
         class StashPush
-          attr_reader :event
+          attr_reader :data
 
-          def initialize(event)
-            #TODO - somehow fetch data about repo from stash
-            @event = event
+          def initialize(data)
+            @data = data
+          end
+
+          def event
+            return @event if defined? @event
+
+            stash_client ||= Travis::Stash.authenticated(payload_user)
+            repo = stash_client.repository(
+              data["repository"]["project"]["key"],
+              data["repository"]["slug"]
+            )
+
+            commits = stash_client.commits_for(
+              repo,
+              since: data["refChange"]["fromHash"],
+              :until => data["refChange"]["toHash"]
+            )
+
+            @event = {
+              'repository' => repo,
+              'commits' => commits,
+            }
+          end
+
+          def ref
+            data['refChange']['refId']
+          end
+
+          def payload_user
+            if owner_name = data['owner_name']
+              User.where(login: owner_name).first
+            elsif user_name = (data['repository']['project']['owner'] && data['repository']['project']['owner']['name'])
+              User.where(login: owner_name).first
+            elsif user_stash_id = data['repository']['owner_stash_id']
+              User.where(stash_id: user_stash_id).first
+            end
+            #elsif login = data['repository']['project']['key']
+            #  #Organization.where(login: login).first
+            #  #User.where(login: login).first
+            #end
           end
 
           def accept?
@@ -27,11 +67,12 @@ module Travis
           def repository
             @repository ||= repo_data && {
               name:            repo_data['name'],
-              description:     repo_data['description'],
-              url:             repo_data['url'],
-              private:         !!repo_data['private'],
-              repository_id:   repo_data['repository_id'],
-              owner_name:   repo_data['owner_name']
+              private:         !repo_data['public'],
+
+              owner_type:      project_data['type'] == 'PERSONAL' ? 'User' : 'Organization',
+              owner_stash_id:  project_owner_stash_id,
+              owner_name:      project_data['key'], #slug of project or user
+              stash_id:        repo_data['id']
             }
           end
 
@@ -41,16 +82,12 @@ module Travis
 
           def commit
             @commit ||= commit_data && {
-              commit:          commit_data['sha'],
+              commit:          commit_data['id'],
               message:         commit_data['message'],
-              branch:          event['ref'].split('/', 3).last,
-              ref:             event['ref'],
-              committed_at:    commit_data['date'],
-              committer_name:  commit_data['committer']['name'],
-              committer_email: commit_data['committer']['email'],
-              author_name:     commit_data['author']['name'],
-              author_email:    commit_data['author']['email'],
-              compare_url:     event['compare']
+              branch:          ref.split('/', 3).last,
+              ref:             ref,
+              committed_at:    Time.at(commit_data['authorTimestamp'].to_i/1000).utc.iso8601,
+              author_name:     commit_data['author']['name']
             }
           end
 
@@ -60,15 +97,25 @@ module Travis
               event['repository']
             end
 
+            def project_data
+              repo_data['project']
+            end
+
+            def project_owner_stash_id
+              owner = project_data['owner']
+              return nil if owner.nil? or (project_data['type'] != 'PERSONAL')
+              owner['id']
+            end
+
             def commit_data
-              @commit_data ||= (last_unskipped_commit || commits.last || event['head_commit'])
+              @commit_data ||= (last_unskipped_commit || commits.first)
               @commit_data['committer'] ||= {}
               @commit_data['author'] ||= {}
               @commit_data
             end
 
             def last_unskipped_commit
-              commits.reverse.find { |commit| !skip_commit?(commit) }
+              commits.find { |commit| !skip_commit?(commit) }
             end
 
             def commits

@@ -106,10 +106,6 @@ class Repository < Travis::Model
     @slug ||= [owner_name, name].join('/')
   end
 
-  def api_url
-    "#{Travis.config.github.api_url}/repos/#{slug}"
-  end
-
   def repository_provider
     @repository_provider ||= begin
       self.provider ||= 'github'
@@ -118,6 +114,10 @@ class Repository < Travis::Model
       providerClassName.constantize.new(self)
     end
     @repository_provider
+  end
+
+  def api_url
+    repository_provider.api_url
   end
 
   def source_url

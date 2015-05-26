@@ -5,6 +5,8 @@ gemspec
 gem 'travis-support',     github: 'final-ci/travis-support'
 gem 'travis-sidekiqs',    github: 'final-ci/travis-sidekiqs', require: nil
 gem 'gh',                 github: 'final-ci/gh'
+gem 'stash-client',       path: '../stash-client'
+
 gem 'addressable'
 gem 'aws-sdk-v1'
 gem 'json', '~> 1.7.7'

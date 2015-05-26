@@ -35,7 +35,6 @@ module Travis
       def stub_github_repo_provider(attributes = {})
         r = Stubs.stub 'github_provider', attributes.reverse_merge(
           source_url: 'git://github.com/svenfuchs/minimal.git',
-          config_url: 'https://api.github.com/repos/svenfuchs/minimal/contents/.travis.yml?ref=62aae5f70ceee39123ef',
           source_host: 'github.com'
         )
       end
@@ -102,9 +101,13 @@ module Travis
           token: 'token',
           pull_request?: false,
           comments_url: 'http://github.com/path/to/comments',
-          config_url: 'https://api.github.com/repos/svenfuchs/minimal/contents/.travis.yml?ref=62aae5f70ceee39123ef',
           repository_provider: repository_provider,
-          fetch_config_content: 'foo: Foo',
+          fetch_config_params: {
+            path: '.travis.yml',
+            ref: commit.commit,
+            repository_name: repo.name,
+            project_key: repo.owner_name
+          },
           result: :accepted,
           created_at: DateTime.new(2013, 01, 01, 0, 0, 0),
           owner_type: 'User',

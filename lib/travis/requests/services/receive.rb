@@ -9,9 +9,9 @@ module Travis
   module Requests
     module Services
       class Receive < Travis::Services::Base
-        require 'travis/requests/services/receive/api'
-        require 'travis/requests/services/receive/pull_request'
-        require 'travis/requests/services/receive/push'
+        require 'travis/requests/services/receive/github_api'
+        require 'travis/requests/services/receive/github_pull_request'
+        require 'travis/requests/services/receive/github_push'
         require 'travis/requests/services/receive/stash_push'
 
         extend Travis::Instrumentation
@@ -21,8 +21,9 @@ module Travis
         register :receive_request
 
         class << self
-          def payload_for(type, data)
-            const_get(type.camelize).new(data)
+          def payload_for(type, data, provider = 'github')
+            provider_type_class = [provider, type].join('_').camelize
+            const_get(provider_type_class).new(data)
           end
         end
 
@@ -70,7 +71,8 @@ module Travis
               :state => :created,
               :commit => commit,
               :owner => repo.owner,
-              :token => params[:token]
+              :token => params[:token],
+              :jid => params[:jid]
             ))
           end
 
@@ -111,6 +113,8 @@ module Travis
               lookup_owner(payload.repository[:owner_type], id: id)
             elsif github_id = payload.repository[:owner_github_id]
               lookup_owner(payload.repository[:owner_type], github_id: github_id)
+            elsif stash_id = payload.repository[:owner_stash_id]
+              lookup_owner(payload.repository[:owner_type], stash_id: stash_id)
             elsif login = payload.repository[:owner_name]
               lookup_owner(%w(User Organization), login: login)
             end
@@ -145,7 +149,11 @@ module Travis
           end
 
           def payload
-            @payload ||= self.class.payload_for(event_type, params[:payload])
+            @payload ||= self.class.payload_for(event_type, params[:payload], provider)
+          end
+
+          def provider
+            @provider ||= (params[:provider] || 'github')
           end
 
           def github_guid

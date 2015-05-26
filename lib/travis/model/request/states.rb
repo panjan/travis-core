@@ -71,7 +71,7 @@ class Request
       end
 
       def fetch_config
-        Travis.run_service(:github_fetch_config, request: self) # TODO move to a service, have it pass the config to configure
+        Travis.run_service(:fetch_config, request: self)
       end
 
       def add_parse_error_build

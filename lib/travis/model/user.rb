@@ -21,6 +21,8 @@ class User < Travis::Model
   before_save :track_github_scopes
 
   serialize :github_oauth_token, Travis::Model::EncryptedColumn.new
+  serialize :stash_oauth_token, Travis::Model::EncryptedColumn.new
+  serialize :stash_oauth_token_secret, Travis::Model::EncryptedColumn.new
 
   class << self
     def with_permissions(permissions)
@@ -49,7 +51,7 @@ class User < Travis::Model
   end
 
   def to_json
-    keys = %w/id login email name locale github_id gravatar_id is_syncing synced_at updated_at created_at/
+    keys = %w/id login email name locale github_id stash_id gravatar_id is_syncing synced_at updated_at created_at/
     { 'user' => attributes.slice(*keys) }.to_json
   end
 
@@ -128,7 +130,10 @@ class User < Travis::Model
 
   def inspect
     if github_oauth_token
-      super.gsub(github_oauth_token, '[REDACTED]')
+      super.
+        gsub(github_oauth_token, '[REDACTED]').
+        gsub(stash_oauth_token || '[REDACTED]',  '[REDACTED]').
+        gsub(stash_oauth_token_secret || '[REDACTED]', '[REDACTED]')
     else
       super
     end

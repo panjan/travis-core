@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Travis::Requests::Services::Receive::Push do
+describe Travis::Requests::Services::Receive::GithubPush do
   let(:data)    { MultiJson.decode(GITHUB_PAYLOADS['gem-release']) }
   let(:payload) { Travis::Requests::Services::Receive.payload_for('push', data) }
 

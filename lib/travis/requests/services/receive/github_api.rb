@@ -2,7 +2,7 @@ module Travis
   module Requests
     module Services
       class Receive < Travis::Services::Base
-        class Api
+        class GithubApi
           VALIDATION_ERRORS = {
             repo: 'Repository data is not present in payload',
           }

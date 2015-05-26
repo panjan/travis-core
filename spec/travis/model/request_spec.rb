@@ -18,12 +18,7 @@ describe Request do
     end
 
     it 'returns the api url to the .travis.yml file on github' do
-      request.config_url.should == 'https://api.github.com/repos/travis-ci/travis-ci/contents/.travis.yml?ref=12345678'
-    end
-
-    it 'returns the api url to the .travis.yml file on github with a gh endpoint given' do
-      GH.set api_url: 'http://localhost/api/v3'
-      request.config_url.should == 'http://localhost/api/v3/repos/travis-ci/travis-ci/contents/.travis.yml?ref=12345678'
+      request.fetch_config_params.should == {project_key: 'travis-ci', repository_name: 'travis-ci',  ref: '12345678', path: '.travis.yml' }
     end
   end
 
