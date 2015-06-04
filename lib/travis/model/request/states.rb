@@ -71,7 +71,9 @@ class Request
       end
 
       def fetch_config
-        Travis.run_service(:github_fetch_config, request: self) # TODO move to a service, have it pass the config to configure
+        # currently supported services are stash_fetch_config or github_fetch_config
+        service_name = repository.provider + '_fetch_config'
+        Travis.run_service(service_name.to_sym, request: self, fetch_config_params: fetch_config_params) # TODO move to a service, have it pass the config to configure
       end
 
       def add_parse_error_build

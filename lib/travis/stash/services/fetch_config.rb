@@ -6,14 +6,14 @@ require 'travis/support/instrumentation'
 require 'travis/services/base'
 
 module Travis
-  module Github
+  module Stash
     module Services
       # encapsulates fetching a .travis.yml from a given commit's config_url
       class FetchConfig < Travis::Services::Base
         include Logging
         extend Instrumentation
 
-        register :github_fetch_config
+        register :stash_fetch_config
 
         def run
           config = retrying(3) { filter(parse(fetch)) }
@@ -32,13 +32,14 @@ module Travis
         end
 
         def fetch_config_params
-          request.fetch_config_params
+          params[:fetch_config_params]
         end
 
         private
 
         def fetch
-          request.fetch_config_content
+          direct_payload_config = request.payload && request.payload['.travis.yml']
+          direct_payload_config || Stash.authenticated(current_user).content(fetch_config_params)
         end
 
           def parse(yaml)

@@ -16,6 +16,65 @@ API_PAYLOADS = {
   }
 }
 
+STASH_PAYLOADS = {
+  "private-repo" => %({
+     "repository":{
+        "slug":"test-repo",
+        "id":789,
+        "name":"test-repo",
+        "scmId":"git",
+        "state":"AVAILABLE",
+        "statusMessage":"Available",
+        "forkable":true,
+        "project":{
+           "key":"FIN",
+           "id":676,
+           "name":"FINAL-CI",
+           "description":"Some description here",
+           "public":false,
+           "type":"NORMAL"
+        },
+        "public":false
+     },
+     "refChanges":[
+        {
+           "refId":"refs/heads/master",
+           "fromHash":"26889fb199985390da9c668d1399702940c44132",
+           "toHash":"08328b76d12e956d96e5e87c1fd7cf34265828ef",
+           "type":"UPDATE"
+        }
+     ]
+  }),
+  "gem-release" => %({
+     "repository":{
+        "slug":"test-repo",
+        "id":789,
+        "name":"test-repo",
+        "scmId":"git",
+        "state":"AVAILABLE",
+        "statusMessage":"Available",
+        "forkable":true,
+        "project":{
+           "key":"FIN",
+           "id":676,
+           "name":"FINAL-CI",
+           "description":"Some description here",
+           "public":true,
+           "type":"NORMAL"
+        },
+        "public":true
+     },
+     "refChanges":[
+        {
+           "refId":"refs/heads/master",
+           "fromHash":"26889fb199985390da9c668d1399702940c44132",
+           "toHash":"08328b76d12e956d96e5e87c1fd7cf34265828ef",
+           "type":"UPDATE"
+        }
+     ]
+  })
+}
+
 GITHUB_PAYLOADS = {
   "private-repo" => %({
     "repository": {

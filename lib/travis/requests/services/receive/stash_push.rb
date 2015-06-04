@@ -18,9 +18,6 @@ module Travis
             @ref = event["refChange"]["refId"]
             commits = stash_client.commits_for(
               repo,
-              #TODO
-              # where is documentation for Stash payload?
-              # based on expediments, the array has only one element.
               since: event["refChange"]["fromHash"],
               :until => event["refChange"]["toHash"]
             )

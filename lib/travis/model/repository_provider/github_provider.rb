@@ -10,14 +10,14 @@ class GithubProvider < RepositoryProvider
   end
 
   def content_url(options)
-    GH.full_url("repos/#{repository.slug}/contents/#{options[:path]}?ref=#{options[:ref]}").to_s
+    GH.full_url("repos/#{options[:project_key]}/#{options[:repository_name]}/contents/#{options[:path]}?ref=#{options[:ref]}").to_s
   end
 
-  def fetch_content(config_url)
-    content = GH[config_url]['content']
-    Travis.logger.warn("[request:fetch_config] Empty content for #{config_url}") if content.nil?
+  def fetch_content(content_params)
+    content = GH[content_url(content_params)]['content']
+    Travis.logger.warn("[request:fetch_config] Empty content for #{content_url(content_params)}") if content.nil?
     content = content.to_s.unpack('m').first
-    Travis.logger.warn("[request:fetch_config] Empty unpacked content for #{config_url}, content was #{content.inspect}") if content.nil?
+    Travis.logger.warn("[request:fetch_config] Empty unpacked content for #{content_url}, content was #{content.inspect}") if content.nil?
     nbsp = "\xC2\xA0".force_encoding("binary")
     content = content.gsub(/^(#{nbsp})+/) { |match| match.gsub(nbsp, " ") }
 

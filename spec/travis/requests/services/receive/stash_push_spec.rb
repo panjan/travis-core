@@ -1,11 +1,13 @@
 require 'spec_helper'
 
-describe Travis::Requests::Services::Receive::Push do
-  let(:data)    { MultiJson.decode(GITHUB_PAYLOADS['gem-release']) }
-  let(:payload) { Travis::Requests::Services::Receive.payload_for('push', data) }
+describe Travis::Requests::Services::Receive::StashPush do
+
+  let(:data)    { MultiJson.decode(STASH_PAYLOADS['gem-release']) }
+  let(:payload) { Travis::Requests::Services::Receive.payload_for('push', data, 'stash') }
 
   describe 'repository' do
     it 'returns all attributes required for a Repository' do
+      pending
       payload.repository.should == {
         :name => 'gem-release',
         :description => 'Release your gems with ease',
@@ -22,6 +24,7 @@ describe Travis::Requests::Services::Receive::Push do
 
   describe 'commit' do
     it 'returns all attributes required for a Commit' do
+      pending
       payload.commit.should == {
         :commit => '46ebe012ef3c0be5542a2e2faafd48047127e4be',
         :message => 'Bump to 0.0.15',
@@ -38,33 +41,40 @@ describe Travis::Requests::Services::Receive::Push do
 
     describe 'branch processing' do
       it 'returns head_commit if commits info is not present' do
+        pending
         payload.event.data['head_commit'] = payload.event.data['commits'].first
         payload.event.data['commits'] = []
         payload.commit[:commit].should == '586374eac43853e5542a2e2faafd48047127e4be'
       end
 
       it 'returns master when ref is ref/heads/master' do
+        pending
         payload.commit[:branch].should == 'master'
       end
 
       it 'returns travis when ref is ref/heads/travis' do
+        pending
         payload.event.data['ref'] = "ref/heads/travis"
         payload.commit[:branch].should == 'travis'
       end
 
       it 'returns features/travis-ci when ref is ref/heads/features/travis-ci' do
+        pending
         payload.event.data['ref'] = "ref/heads/features/travis-ci"
         payload.commit[:branch].should == 'features/travis-ci'
       end
     end
 
     it 'returns the last commit that isn\'t skipped' do
-      payload = Travis::Requests::Services::Receive.payload_for('push', GITHUB_PAYLOADS['skip-last'])
+      pending
+      payload = Travis::Requests::Services::Receive.payload_for('push', STASH_PAYLOADS['skip-last'])
       payload.commit[:commit].should == '586374eac43853e5542a2e2faafd48047127e4be'
     end
 
     it 'returns the last skipped commit if all commits are skipped' do
-      payload = Travis::Requests::Services::Receive.payload_for('push', GITHUB_PAYLOADS['skip-all'])
+      pending
+      payload = Travis::Requests::Services::Receive.payload_for('push', STASH_PAYLOADS['skip-last'])
+      payload = Travis::Requests::Services::Receive.payload_for('push', STASH_PAYLOADS['skip-all'])
       payload.commit[:commit].should == '46ebe012ef3c0be5542a2e2faafd48047127e4be'
     end
   end

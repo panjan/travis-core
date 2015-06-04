@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Travis::Requests::Services::Receive::Api do
+describe Travis::Requests::Services::Receive::GithubApi do
   include Travis::Testing::Stubs
 
   let(:payload) { API_PAYLOADS['custom'].dup }

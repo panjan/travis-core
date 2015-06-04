@@ -75,13 +75,13 @@ class Request < Travis::Model
     end
   end
 
-  def config_url
-    repository_provider.content_url(path: '.travis.yml', ref: commit.commit)
-  end
-
-  def fetch_config_content
-    t = payload && payload['.travis.yml']
-    t ? YAML.dump(t) : repository_provider.fetch_content(config_url)
+  def fetch_config_params
+    {
+      path: '.travis.yml',
+      ref: commit.commit,
+      repository_name: repository.name,
+      project_key: repository.owner_name
+    }
   end
 
   def same_repo_pull_request?

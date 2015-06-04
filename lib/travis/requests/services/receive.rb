@@ -21,8 +21,7 @@ module Travis
         register :receive_request
 
         class << self
-          def payload_for(provider, type, data)
-            provider ||= 'github'
+          def payload_for(type, data, provider = 'github')
             provider_type_class = [provider, type].join('_').camelize
             const_get(provider_type_class).new(data)
           end
@@ -141,7 +140,7 @@ module Travis
           end
 
           def payload
-            @payload ||= self.class.payload_for(provider, event_type, params[:payload])
+            @payload ||= self.class.payload_for(event_type, params[:payload], provider)
           end
 
           def provider

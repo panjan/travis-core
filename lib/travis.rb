@@ -47,6 +47,7 @@ module Travis
   require 'travis/enqueue'
   require 'travis/features'
   require 'travis/github'
+  require 'travis/stash'
   require 'travis/logs'
   require 'travis/mailer'
   require 'travis/notification'
@@ -73,6 +74,7 @@ module Travis
       Services.register
       Enqueue::Services.register
       Github::Services.register
+      Stash::Services.register
       Logs::Services.register
       Requests::Services.register
     end

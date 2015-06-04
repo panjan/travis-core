@@ -12,7 +12,7 @@ describe Travis::Github::Services::FetchConfig do
   let(:exception) { GH::Error.new }
 
   before :each do
-    GH.stubs(:[]).with(request.config_url).returns(body)
+    GH.stubs(:[]).with(request.repository_provider.content_url(request.fetch_config_params)).returns(body)
   end
 
   describe 'config' do
@@ -89,9 +89,17 @@ describe Travis::Github::Services::FetchConfig::Instrument do
   include Travis::Testing::Stubs
 
   let(:body)      { { 'content' => ['foo: Foo'].pack('m') } }
+  let(:repo)      { Factory(:repository, :owner_name => 'travis-ci', :name => 'travis-core') }
+  let!(:request)  { Factory(:request, :repository => repo) }
   let(:service)   { Travis::Github::Services::FetchConfig.new(nil, request: request) }
   let(:publisher) { Travis::Notification::Publisher::Memory.new }
   let(:event)     { publisher.events[1] }
+  let(:fetch_params) {
+    { path: '.trais.yml',
+      ref: '12345678',
+      repository_name: 'bar',
+      project_key: 'foo'
+  } }
 
   before :each do
     GH.stubs(:[]).returns(body)
@@ -102,29 +110,29 @@ describe Travis::Github::Services::FetchConfig::Instrument do
     service.run
     event.should publish_instrumentation_event(
       event: 'travis.github.services.fetch_config.run:completed',
-      message: 'Travis::Github::Services::FetchConfig#run:completed https://api.github.com/repos/svenfuchs/minimal/contents/.travis.yml?ref=62aae5f70ceee39123ef',
+      message: "Travis::Github::Services::FetchConfig#run:completed {:path=>\".travis.yml\", :ref=>\"62aae5f70ceee39123ef\", :repository_name=>\"travis-core\", :project_key=>\"travis-ci\"}",
       result: { 'foo' => 'Foo', '.result' => 'configured' },
       data: {
-        url: 'https://api.github.com/repos/svenfuchs/minimal/contents/.travis.yml?ref=62aae5f70ceee39123ef'
+        :fetch_config_params=>"{:path=>\".travis.yml\", :ref=>\"62aae5f70ceee39123ef\", :repository_name=>\"travis-core\", :project_key=>\"travis-ci\"}"
       }
     )
   end
 
   it 'strips an access_token if present (1)' do
-    service.stubs(:config_url).returns('/foo/bar?access_token=123456')
+    service.stubs(:fetch_config_params).returns(fetch_params)
     service.run
-    event[:data][:url].should == '/foo/bar?access_token=[secure]'
+    event[:data][:fetch_config_params].should == "{:path=>\".trais.yml\", :ref=>\"12345678\", :repository_name=>\"bar\", :project_key=>\"foo\"}"
   end
 
   it 'strips an access_token if present (2)' do
-    service.stubs(:config_url).returns('/foo/bar?ref=abcd&access_token=123456')
+    service.stubs(:fetch_config_params).returns(fetch_params.update(access_token: 'secret'))
     service.run
-    event[:data][:url].should == '/foo/bar?ref=abcd&access_token=[secure]'
+    event[:data][:fetch_config_params].should == "{:path=>\".trais.yml\", :ref=>\"12345678\", :repository_name=>\"bar\", :project_key=>\"foo\", :access_token=[secure]>\"secret\"}"
   end
 
   it 'strips a secret if present (2)' do
-    service.stubs(:config_url).returns('/foo/bar?ref=abcd&client_secret=123456')
+    service.stubs(:fetch_config_params).returns(fetch_params.update(client_secret: 'secret'))
     service.run
-    event[:data][:url].should == '/foo/bar?ref=abcd&client_secret=[secure]'
+    event[:data][:fetch_config_params].should == "{:path=>\".trais.yml\", :ref=>\"12345678\", :repository_name=>\"bar\", :project_key=>\"foo\", :client_secret=[secure]>\"secret\"}"
   end
 end
