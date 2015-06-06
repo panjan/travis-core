@@ -1,5 +1,6 @@
 require 'gh'
 require 'core_ext/hash/compact'
+require 'stash/client'
 
 module Travis
   module Stash
@@ -9,7 +10,7 @@ module Travis
       def authenticated(user)
         fail "we don't have a github token for #{user.inspect}" if user.github_oauth_token.blank?
         opts = {
-          url: "#{source_protocol}://#{source_host}:#{source_port}",
+          url: "#{config.source_protocol}://#{config.source_host}:#{config.source_port}",
           ssl: Travis.config.ssl.merge(Travis.config.stash.ssl || {}).to_hash.compact
         }
 
@@ -18,11 +19,11 @@ module Travis
           secret: config.oauth.secret,
           access_token: user.access_token,
           access_token_secret: user.access_token_secret
-        } if repository.private && config.oauth
+        } if config.oauth
 
         opts[:credentials] = config.credentials if config.credentials
 
-        clinet = Stash::Client.new(opts)
+        clinet = ::Stash::Client.new(opts)
 
         yield(client) if block_given?
         client

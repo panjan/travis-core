@@ -16,14 +16,7 @@ module Travis
         register :github_fetch_config
 
         def run
-          config = retrying(3) { filter(parse(fetch)) }
-          config || Travis.logger.warn("[request:fetch_config] Empty config for request id=#{request.id} config_url=#{config_url.inspect}")
-        rescue GH::Error => e
-          if e.info[:response_status] == 404
-            { '.result' => 'not_found' }
-          else
-            { '.result' => 'server_error' }
-          end
+          fetch || Travis.logger.warn("[request:fetch_config] Empty config for request id=#{request.id} config_url=#{config_url.inspect}")
         end
         instrument :run
 
@@ -35,45 +28,30 @@ module Travis
           request.fetch_config_params
         end
 
-        private
-
-        def fetch
-          request.fetch_config_content
+        def config_url
+          GH.full_url("repos/#{fetch_config_params[:project_key]}/#{fetch_config_params[:repository_name]}/contents/#{fetch_config_params[:path]}?ref=#{fetch_config_params[:ref]}").to_s
         end
 
-          def parse(yaml)
-            YAML.load(yaml).merge('.result' => 'configured')
-          rescue StandardError, Psych::SyntaxError => e
-            error "[request:fetch_config] Error parsing .travis.yml for #{fetch_config_params}: #{e.message}"
-            {
-              '.result' => 'parse_error',
-              '.result_message' => e.is_a?(Psych::SyntaxError) ? e.message.split(": ").last : e.message
-            }
-          end
+        private
 
-          def filter(config)
-            unless Travis::Features.active?(:template_selection, request.repository)
-              config = config.except('dist').except('group')
-            end
+          def fetch
+            #TODO: does ti work even for private repos?
+            # e.g.: gh = Github.authenticate(current_user)
+            content = GH[config_url]['content']
+            Travis.logger.warn("[request:fetch_config] Empty content for #{config_url}") if content.nil?
+            content = content.to_s.unpack('m').first
+            Travis.logger.warn("[request:fetch_config] Empty unpacked content for #{config_url}, content was #{content.inspect}") if content.nil?
+            nbsp = "\xC2\xA0".force_encoding("binary")
+            content = content.gsub(/^(#{nbsp})+/) { |match| match.gsub(nbsp, " ") }
 
-            config
-          end
-
-          def retrying(times)
-            count, result = 0, nil
-            until result || count > times
-              result = yield
-              count += 1
-              Travis.logger.warn("[request:fetch_config] Retrying to fetch config for #{fetch_config_params}") unless result
-            end
-            result
+            content
           end
 
           class Instrument < Notification::Instrument
             def run_completed
               # TODO exctract something like Url.strip_secrets
-              fetch_config_params = target.fetch_config_params.inspect.gsub(/(token|secret)=\w*/) { "#{$1}=[secure]" }
-              publish(msg: "#{fetch_config_params}", fetch_config_params: fetch_config_params, result: result)
+              config_url = target.config_url.gsub(/(token|secret)=\w*/) { "#{$1}=[secure]" }
+              publish(msg: "#{config_url}", url: config_url, result: result)
             end
           end
           Instrument.attach_to(self)

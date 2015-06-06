@@ -6,6 +6,10 @@ class StashProvider < RepositoryProvider
     @repository = repository
   end
 
+  def name
+    'stash'
+  end
+
   def source_url
     "#{git_source_protocol}://git@#{source_host}:#{git_source_port}/" +
       "#{repository.owner_name}/#{repository.name}.git"

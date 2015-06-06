@@ -13,7 +13,7 @@ describe Request::States do
 
   before :each do
     repository.save!
-    Travis.stubs(:run_service).with(:github_fetch_config, is_a(Hash)).returns(config)
+    Travis.stubs(:run_service).with(:fetch_config, is_a(Hash)).returns(config)
     request.stubs(:add_build)
     request.stubs(:creates_jobs?).returns(true)
   end

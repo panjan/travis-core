@@ -1,42 +1,38 @@
 require 'spec_helper'
 
-describe Travis::Github::Services::FetchConfig do
+class StashClientFaker
+  def initialize(opts)
+  end
+end
+
+describe Travis::Stash::Services::FetchConfig do
   include Support::Redis
   include Support::ActiveRecord
 
   let(:body)      { { 'content' => ['foo: Foo'].pack('m') } }
   let(:repo)      { Factory(:repository, :owner_name => 'travis-ci', :name => 'travis-core') }
   let!(:request)  { Factory(:request, :repository => repo) }
-  let(:service)   { described_class.new(nil, request: request) }
+  let(:service)   { described_class.new(nil, repo.owner, request: request) }
   let(:result)    { service.run }
   let(:exception) { GH::Error.new }
 
-  before :each do
-    content_url = GH.full_url("repos/#{repo.owner_name}/#{repo.name}/contents/.travis.yml?ref=#{request.commit.commit}").to_s
-    GH.stubs(:[]).with(content_url).returns(body)
-  end
+  #before :each do
+  #  StashClientFaker.stubs(:content).with(request.fetch_config_params).returns(body)
+  #  Travis::Stash.stubs(:authenticated).with(repo.owner).returns(
+  #    StashClientFaker.new({}).stubs(:content).returns(body)
+  #  )
+  #end
 
-  describe 'config_url' do
-    it 'returns the api url to the .travis.yml file on github' do
-      service.config_url.should == 'https://api.github.com/repos/travis-ci/travis-core/contents/.travis.yml?ref=62aae5f70ceee39123ef'
-    end
+  #describe 'config' do
+  #  it 'returns a string' do
+  #    p result
+  #    result.should be_a(String)
+  #  end
+  #end
 
-    it 'returns the api url to the .travis.yml file on github with a gh endpoint given' do
-      pending '...how can I then reset api_url?'
-      GH.set api_url: 'http://localhost/api/v3'
-      service.config_url.should == 'http://localhost/api/v3/repos/travis-ci/travis-core/contents/.travis.yml?ref=62aae5f70ceee39123ef'
-    end
-  end
-
-
-  describe 'config' do
-    it 'returns a hash' do
-      result.should be_a(String)
-    end
-  end
 end
 
-describe Travis::Github::Services::FetchConfig::Instrument do
+describe Travis::Stash::Services::FetchConfig::Instrument do
   include Travis::Testing::Stubs
 
   let(:body)      { { 'content' => ['foo: Foo'].pack('m') } }
