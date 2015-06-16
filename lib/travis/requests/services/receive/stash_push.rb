@@ -5,26 +5,46 @@ module Travis
     module Services
       class Receive < Travis::Services::Base
         class StashPush
-          attr_reader :event, :ref
+          attr_reader :data, :ref
 
-          def initialize(event)
-            url = Travis.config.stash.api_url
-            stash_client = Stash::Client.new({url: url}.update(Travis.config.stash.connection || {}))
+          def initialize(data)
+            @data = data
+            @ref = data["refChange"]["refId"]
+          end
 
+          def event
+            return @event if defined? @event
+
+            stash_client ||= Travis::Stash.authenticated(payload_user)
             repo = stash_client.repository(
-              event["repository"]["project"]["key"],
-              event["repository"]["slug"]
+              data["repository"]["project"]["key"],
+              data["repository"]["slug"]
             )
-            @ref = event["refChange"]["refId"]
+
             commits = stash_client.commits_for(
               repo,
-              since: event["refChange"]["fromHash"],
-              :until => event["refChange"]["toHash"]
+              since: data["refChange"]["fromHash"],
+              :until => data["refChange"]["toHash"]
             )
+
             @event = {
               'repository' => repo,
               'commits' => commits,
             }
+          end
+
+          def payload_user
+            if owner_name = data['owner_name']
+              User.where(login: owner_name).first
+            elsif user_name = (data['repository']['project']['owner'] && data['repository']['project']['owner']['name'])
+              User.where(login: owner_name).first
+            elsif user_stash_id = data['repository']['owner_stash_id']
+              User.where(stash_id: user_stash_id).first
+            end
+            #elsif login = data['repository']['project']['key']
+            #  #Organization.where(login: login).first
+            #  #User.where(login: login).first
+            #end
           end
 
           def accept?
@@ -44,12 +64,12 @@ module Travis
           def repository
             @repository ||= repo_data && {
               name:            repo_data['name'],
-              description:     repo_data['description'],
-              url:             repo_data['url'],
-              private:         !!repo_data['private'],
-              repository_id:   project_data['repository_id'],
-              #TODO: provider_id:   project_data['id'],
-              type:            project_data['type'],
+              #description:     repo_data['description'],
+              #url:             repo_data['url'],
+              private:         !repo_data['public'],
+
+              type:            project_data['type'] == 'PERSONAL' ? 'User' : 'Organization',
+              owner_stash_id:  project_owner_stash_id,
               owner_name:      project_owner
             }
           end
@@ -81,6 +101,12 @@ module Travis
 
             def project_data
               repo_data['project']
+            end
+
+            def project_owner_stash_id
+              (project_owner['type'] == 'PERSONAL') &&
+                project_owner['owner'] &&
+                project_owner['owner']['id']
             end
 
             def project_owner

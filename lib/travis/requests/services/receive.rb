@@ -106,6 +106,8 @@ module Travis
               lookup_owner(payload.repository[:owner_type], id: id)
             elsif github_id = payload.repository[:owner_github_id]
               lookup_owner(payload.repository[:owner_type], github_id: github_id)
+            elsif stash_id = payload.repository[:owner_stash_id]
+              lookup_owner(payload.repository[:owner_type], stash_id: stash_id)
             elsif login = payload.repository[:owner_name]
               lookup_owner(%w(User Organization), login: login)
             end
