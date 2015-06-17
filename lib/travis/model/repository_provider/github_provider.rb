@@ -17,6 +17,10 @@ class GithubProvider < RepositoryProvider
     Travis.config.github.source_host || 'github.com'
   end
 
+  def api_url
+    "#{Travis.config.github.api_url}/repos/#{repository.slug}"
+  end
+
   private
 
   def private_mode?

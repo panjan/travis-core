@@ -70,7 +70,7 @@ module Travis
 
               type:            project_data['type'] == 'PERSONAL' ? 'User' : 'Organization',
               owner_stash_id:  project_owner_stash_id,
-              owner_name:      project_owner
+              owner_name:      project_data['key'] #slug of project or user
             }
           end
 
@@ -104,13 +104,9 @@ module Travis
             end
 
             def project_owner_stash_id
-              (project_owner['type'] == 'PERSONAL') &&
-                project_owner['owner'] &&
-                project_owner['owner']['id']
-            end
-
-            def project_owner
-              project_data['owner'] && project_data['owner']['name'] || project_data['name']
+              owner = project_data['owner']
+              return nil if owner.nil? or (project_data['type'] != 'PERSONAL')
+              owner['id']
             end
 
             def commit_data

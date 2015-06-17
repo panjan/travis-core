@@ -35,6 +35,10 @@ class StashProvider < RepositoryProvider
     config.git_source_protocol || 'ssh'
   end
 
+  def api_url
+    "#{Travis.config.stash.api_url}/projects/#{repository.owner_name}/repos/#{repository.name}"
+  end
+
   private
 
     def config
