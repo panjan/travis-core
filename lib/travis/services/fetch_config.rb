@@ -10,9 +10,6 @@ module Travis
 
       def run
         direct_payload_config = request.payload && request.payload['.travis.yml']
-        puts "\n\n\n"
-        puts "Direct: #{direct_payload_config.inspect}"
-        puts "\n\n\n"
 
         if direct_payload_config
           raw_config_content = YAML.dump(direct_payload_config)

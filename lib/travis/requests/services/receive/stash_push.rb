@@ -5,11 +5,10 @@ module Travis
     module Services
       class Receive < Travis::Services::Base
         class StashPush
-          attr_reader :data, :ref
+          attr_reader :data
 
           def initialize(data)
             @data = data
-            @ref = data["refChange"]["refId"]
           end
 
           def event
@@ -31,6 +30,10 @@ module Travis
               'repository' => repo,
               'commits' => commits,
             }
+          end
+
+          def ref
+            data['refChange']['refId']
           end
 
           def payload_user
@@ -64,13 +67,12 @@ module Travis
           def repository
             @repository ||= repo_data && {
               name:            repo_data['name'],
-              #description:     repo_data['description'],
-              #url:             repo_data['url'],
               private:         !repo_data['public'],
 
-              type:            project_data['type'] == 'PERSONAL' ? 'User' : 'Organization',
+              owner_type:      project_data['type'] == 'PERSONAL' ? 'User' : 'Organization',
               owner_stash_id:  project_owner_stash_id,
-              owner_name:      project_data['key'] #slug of project or user
+              owner_name:      project_data['key'], #slug of project or user
+              stash_id:        repo_data['id']
             }
           end
 
@@ -84,12 +86,8 @@ module Travis
               message:         commit_data['message'],
               branch:          ref.split('/', 3).last,
               ref:             ref,
-              committed_at:    Time.at(commit_data['authorTimestamp']),
-              #committer_name:  commit_data['committer']['name'],
-              #committer_email: commit_data['committer']['email'],
-              author_name:     commit_data['author']['name'],
-              author_email:    commit_data['author']['email'],
-              #compare_url:     event['compare']
+              committed_at:    Time.at(commit_data['authorTimestamp'].to_i/1000).utc.iso8601,
+              author_name:     commit_data['author']['name']
             }
           end
 
@@ -110,14 +108,14 @@ module Travis
             end
 
             def commit_data
-              @commit_data ||= (last_unskipped_commit || commits.last || event['head_commit'])
+              @commit_data ||= (last_unskipped_commit || commits.first)
               @commit_data['committer'] ||= {}
               @commit_data['author'] ||= {}
               @commit_data
             end
 
             def last_unskipped_commit
-              commits.reverse.find { |commit| !skip_commit?(commit) }
+              commits.find { |commit| !skip_commit?(commit) }
             end
 
             def commits

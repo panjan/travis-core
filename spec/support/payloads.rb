@@ -16,6 +16,87 @@ API_PAYLOADS = {
   }
 }
 
+STASH_COMMITS_PAYLOAD = [
+  {"id"=>"a6656906d4bd0ed38e8dd142f690e74509c63961",
+  "displayId"=>"a6656906d4b",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804749000,
+  "message"=>"br8",
+  "parents"=>
+   [{"id"=>"3d201c35ce972ae069fe21781fca729aa459d89f",
+     "displayId"=>"3d201c35ce9"}]},
+ {"id"=>"3d201c35ce972ae069fe21781fca729aa459d89f",
+  "displayId"=>"3d201c35ce9",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804748000,
+  "message"=>"br7",
+  "parents"=>
+   [{"id"=>"bdd38d4e69aa905c880d3f32f61e248fc5138753",
+     "displayId"=>"bdd38d4e69a"}]},
+ {"id"=>"bdd38d4e69aa905c880d3f32f61e248fc5138753",
+  "displayId"=>"bdd38d4e69a",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804746000,
+  "message"=>"br6",
+  "parents"=>
+   [{"id"=>"d83821a18d2af9a037b8d81f4f99234aa9f805d2",
+     "displayId"=>"d83821a18d2"}]}
+]
+
+STASH_COMMITS_PAYLOAD_SKIP_LAST = [
+  {"id"=>"a6656906d4bd0ed38e8dd142f690e74509c63961",
+  "displayId"=>"a6656906d4b",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804749000,
+  "message"=>"br8 [ci skip]",
+  "parents"=>
+   [{"id"=>"3d201c35ce972ae069fe21781fca729aa459d89f",
+     "displayId"=>"3d201c35ce9"}]},
+ {"id"=>"3d201c35ce972ae069fe21781fca729aa459d89f",
+  "displayId"=>"3d201c35ce9",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804748000,
+  "message"=>"br7",
+  "parents"=>
+   [{"id"=>"bdd38d4e69aa905c880d3f32f61e248fc5138753",
+     "displayId"=>"bdd38d4e69a"}]},
+ {"id"=>"bdd38d4e69aa905c880d3f32f61e248fc5138753",
+  "displayId"=>"bdd38d4e69a",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804746000,
+  "message"=>"br6",
+  "parents"=>
+   [{"id"=>"d83821a18d2af9a037b8d81f4f99234aa9f805d2",
+     "displayId"=>"d83821a18d2"}]}
+]
+
+STASH_COMMITS_PAYLOAD_SKIP_ALL = [
+  {"id"=>"a6656906d4bd0ed38e8dd142f690e74509c63961",
+  "displayId"=>"a6656906d4b",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804749000,
+  "message"=>"br8 [ci skip]",
+  "parents"=>
+   [{"id"=>"3d201c35ce972ae069fe21781fca729aa459d89f",
+     "displayId"=>"3d201c35ce9"}]},
+ {"id"=>"3d201c35ce972ae069fe21781fca729aa459d89f",
+  "displayId"=>"3d201c35ce9",
+  "author"=>
+   {"name"=>"Lukas Svoboda", "emailAddress"=>"lukas.svoboda@gmail.com"},
+  "authorTimestamp"=>1432804748000,
+  "message"=>"br7 [ci skip]",
+  "parents"=>
+   [{"id"=>"bdd38d4e69aa905c880d3f32f61e248fc5138753",
+     "displayId"=>"bdd38d4e69a"}]}
+]
+
 STASH_PAYLOADS = {
   "private-repo" => %({
      "repository":{
@@ -35,6 +116,12 @@ STASH_PAYLOADS = {
            "type":"NORMAL"
         },
         "public":false
+     },
+     "refChange": {
+       "refId":"refs/heads/master",
+       "fromHash":"26889fb199985390da9c668d1399702940c44132",
+       "toHash":"08328b76d12e956d96e5e87c1fd7cf34265828ef",
+       "type":"UPDATE"
      },
      "refChanges":[
         {
@@ -63,6 +150,12 @@ STASH_PAYLOADS = {
            "type":"NORMAL"
         },
         "public":true
+     },
+     "refChange": {
+        "refId":"refs/heads/master",
+        "fromHash":"26889fb199985390da9c668d1399702940c44132",
+        "toHash":"08328b76d12e956d96e5e87c1fd7cf34265828ef",
+        "type":"UPDATE"
      },
      "refChanges":[
         {

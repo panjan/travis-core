@@ -8,18 +8,20 @@ module Travis
 
     class << self
       def authenticated(user)
-        fail "we don't have a stash token for #{user.inspect}" if user.stash_oauth_token.blank?
         opts = {
           url: "#{config.source_protocol}://#{config.source_host}:#{config.source_port}",
-          ssl: Travis.config.ssl.merge(Travis.config.stash.connection.ssl || {}).to_hash.compact
+          ssl: Travis.config.ssl.merge(config.connection.ssl || {}).to_hash.compact
         }
 
-        opts[:oauth] = {
-          key: config.oauth.key,
-          secret: config.oauth.secret,
-          access_token: user.stash_oauth_token,
-          access_token_secret: user.stash_oauth_token_secret
-        } if config.oauth and user
+        if config.oauth and user
+          fail "we don't have a stash token for #{user.inspect}" if user.stash_oauth_token.blank?
+          opts[:oauth] = {
+            key: config.oauth.key,
+            secret: config.oauth.secret,
+            access_token: user.stash_oauth_token,
+            access_token_secret: user.stash_oauth_token_secret
+          }
+        end
 
         opts[:credentials] = config.credentials if config.credentials
 
@@ -34,7 +36,7 @@ module Travis
       end
 
       def config
-        Travis.config.stash || {}
+        Travis.config.stash || { }
       end
 
     end
