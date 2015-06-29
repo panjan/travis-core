@@ -22,7 +22,7 @@ describe Travis::Requests::Services::Receive::StashPush do
 
   describe 'repository' do
     it 'returns all attributes required for a Repository' do
-      Travis::Stash.stubs(:authenticated).returns(FakeStashClient.new(data))
+      Travis::Stash.stubs(:client).returns(FakeStashClient.new(data))
       payload.repository.should == {
         :name => 'test-repo',
         :owner_name => 'FIN',
@@ -36,7 +36,7 @@ describe Travis::Requests::Services::Receive::StashPush do
 
   describe 'commit' do
     it 'returns all attributes required for a Commit' do
-      Travis::Stash.stubs(:authenticated).returns(FakeStashClient.new(data))
+      Travis::Stash.stubs(:client).returns(FakeStashClient.new(data))
       payload.commit.should == {
         :commit => 'a6656906d4bd0ed38e8dd142f690e74509c63961',
         :message => 'br8',
@@ -50,30 +50,30 @@ describe Travis::Requests::Services::Receive::StashPush do
 
     describe 'branch processing' do
       it 'returns master when ref is ref/heads/master' do
-        Travis::Stash.stubs(:authenticated).returns(FakeStashClient.new(data))
+        Travis::Stash.stubs(:client).returns(FakeStashClient.new(data))
         payload.commit[:branch].should == 'master'
       end
 
       it 'returns travis when ref is ref/heads/travis' do
-        Travis::Stash.stubs(:authenticated).returns(FakeStashClient.new(data))
+        Travis::Stash.stubs(:client).returns(FakeStashClient.new(data))
         payload.data['refChange']['refId'] = "ref/heads/travis"
         payload.commit[:branch].should == 'travis'
       end
 
       it 'returns features/travis-ci when ref is ref/heads/features/travis-ci' do
-        Travis::Stash.stubs(:authenticated).returns(FakeStashClient.new(data))
+        Travis::Stash.stubs(:client).returns(FakeStashClient.new(data))
         payload.data['refChange']['refId'] = "ref/heads/features/travis-ci"
         payload.commit[:branch].should == 'features/travis-ci'
       end
     end
 
     it 'returns the last commit that isn\'t skipped' do
-      Travis::Stash.stubs(:authenticated).returns(FakeStashClient.new(data, STASH_COMMITS_PAYLOAD_SKIP_LAST))
+      Travis::Stash.stubs(:client).returns(FakeStashClient.new(data, STASH_COMMITS_PAYLOAD_SKIP_LAST))
       payload.commit[:commit].should == '3d201c35ce972ae069fe21781fca729aa459d89f'
     end
 
     it 'returns the last skipped commit if all commits are skipped' do
-      Travis::Stash.stubs(:authenticated).returns(FakeStashClient.new(data, STASH_COMMITS_PAYLOAD_SKIP_ALL))
+      Travis::Stash.stubs(:client).returns(FakeStashClient.new(data, STASH_COMMITS_PAYLOAD_SKIP_ALL))
       payload.commit[:commit].should == 'a6656906d4bd0ed38e8dd142f690e74509c63961'
     end
   end

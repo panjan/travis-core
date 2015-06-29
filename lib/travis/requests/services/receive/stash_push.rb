@@ -1,5 +1,3 @@
-require 'stash-client'
-
 module Travis
   module Requests
     module Services
@@ -14,7 +12,11 @@ module Travis
           def event
             return @event if defined? @event
 
-            stash_client ||= Travis::Stash.authenticated(payload_user)
+            stash_client ||= if (data['repository'] && data['repository']['public'])
+              Travis::Stash.client
+            else
+              Travis::Stash.authenticated(payload_user)
+            end
             repo = stash_client.repository(
               data["repository"]["project"]["key"],
               data["repository"]["slug"]
