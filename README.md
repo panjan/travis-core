@@ -1,6 +1,6 @@
 # travis-core
 
-[![Build Status](https://api.travis-ci.org/travis-ci/travis-core.png?branch=master)](https://travis-ci.org/travis-ci/travis-core)
+[![Build Status](https://api.travis-ci.org/final-ci/travis-core.png?branch=master)](https://travis-ci.org/final-ci/travis-core)
 
 Travis Core (or travis-core) contains shared code among different Travis CI applications.
 
