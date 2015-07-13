@@ -4,6 +4,7 @@ gemspec
 
 gem 'travis-support',     github: 'final-ci/travis-support'
 gem 'travis-sidekiqs',    github: 'final-ci/travis-sidekiqs', require: nil
+gem 'sidekiq-status',     github: 'utgarda/sidekiq-status', ref: 'e77d5dc2ea0a249ccbbafead21ece59d6b8caf73', require: nil
 gem 'gh',                 github: 'final-ci/gh'
 gem 'stash-client',       github: 'final-ci/stash-client'
 

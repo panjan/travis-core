@@ -17,7 +17,7 @@ module Travis
 
         def result
           if repo
-            columns = %w/id repository_id commit_id created_at owner_id owner_type
+            columns = %w/id jid repository_id commit_id created_at owner_id owner_type
                          event_type base_commit head_commit result message payload state/
             requests = repo.requests.select(columns.map { |c| %Q["requests"."#{c}"] })
             if params[:older_than]

@@ -607,7 +607,8 @@ CREATE TABLE repositories (
     github_id integer,
     default_branch character varying(255),
     github_language character varying(255),
-    settings json
+    settings json,
+    provider character varying(255) DEFAULT 'github'::character varying
 );
 
 
@@ -654,7 +655,8 @@ CREATE TABLE requests (
     owner_id integer,
     owner_type character varying(255),
     result character varying(255),
-    message character varying(255)
+    message character varying(255),
+    jid character varying(255)
 );
 
 
@@ -802,7 +804,10 @@ CREATE TABLE users (
     is_syncing boolean,
     synced_at timestamp without time zone,
     github_scopes text,
-    education boolean
+    education boolean,
+    stash_id integer,
+    stash_oauth_token character varying(255),
+    stash_oauth_token_secret character varying(255)
 );
 
 
@@ -1282,6 +1287,13 @@ CREATE UNIQUE INDEX index_users_on_github_id ON users USING btree (github_id);
 --
 
 CREATE INDEX index_users_on_login ON users USING btree (login);
+
+
+--
+-- Name: index_users_on_stash_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_users_on_stash_id ON users USING btree (stash_id);
 
 
 --
