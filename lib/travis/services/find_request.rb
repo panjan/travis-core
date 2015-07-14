@@ -28,15 +28,12 @@ module Travis
 
           if (params[:id_or_jid].to_s.size > 8)
             jid = params[:id_or_jid]
-            puts "hledam jid: #{jid}"
             @result = scope(:request).find_by_jid(jid)
-            puts "existujici jid: #{jid}"
             return @result if @result
 
             #return state form Sidekiq if scheduled
             queued_status = ::Sidekiq::Status::status(jid)
-            puts "sidekiq status: #{jid}"
-            @result = { state: "request_#{queued_status}", jid: jid } if queued_status
+            @result = Request.new(state: "request_#{queued_status}", jid: jid) if queued_status
           else
             @result = scope(:request).find_by_id(params[:id_or_jid])
           end
