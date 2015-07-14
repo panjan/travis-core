@@ -13,6 +13,7 @@ module Travis
         require 'travis/requests/services/receive/github_pull_request'
         require 'travis/requests/services/receive/github_push'
         require 'travis/requests/services/receive/stash_push'
+        require 'travis/requests/services/receive/stash_api'
 
         extend Travis::Instrumentation
 
