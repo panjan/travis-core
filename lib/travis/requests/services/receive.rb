@@ -24,6 +24,7 @@ module Travis
         class << self
           def payload_for(type, data, provider = 'github')
             provider_type_class = [provider, type].join('_').camelize
+            Travis.logger.info("[request:receive] Starting payload_for class #{provider_type_class.inspect}")
             const_get(provider_type_class).new(data)
           end
         end
