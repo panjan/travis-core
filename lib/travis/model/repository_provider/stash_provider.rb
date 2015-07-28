@@ -11,8 +11,13 @@ class StashProvider < RepositoryProvider
   end
 
   def source_url
-    "#{git_source_protocol}://git@#{source_host}:#{git_source_port}/" +
-      "#{repository.owner_name}/#{repository.name}.git"
+    if repository.private?
+      "#{git_source_protocol}://git@#{source_host}:#{git_source_port}/" +
+        "#{repository.owner_name}/#{repository.name}.git"
+    else
+      "#{source_protocol}://#{source_host}:#{source_port}/scm/" +
+        "#{repository.owner_name}/#{repository.name}.git"
+    end
   end
 
   def source_host

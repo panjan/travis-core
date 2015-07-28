@@ -7,10 +7,11 @@ describe StashProvider do
   let(:stash_provider) { described_class.new(repo) }
 
   before :each do
-    Travis.config.stash = { source_host: 'stash.example.com' }
+    Travis.config.stash.stubs(:source_host).returns('stash.example.com')
   end
 
   it '#source_url' do
+    repo.private = true;
     stash_provider.source_url.should == 'ssh://git@stash.example.com:22/travis-ci/travis-ci.git'
   end
 

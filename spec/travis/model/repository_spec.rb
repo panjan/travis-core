@@ -161,7 +161,7 @@ describe Repository do
     let(:repo) { Repository.new(owner_name: 'travis-ci', name: 'travis-ci') }
 
     before :each do
-      Travis.config.github.api_url = 'https://api.github.com'
+      Travis.config.github.stubs(:api_url).returns('https://api.github.com')
     end
 
     it 'returns the api url for the repository' do
@@ -192,7 +192,7 @@ describe Repository do
       let(:repo) { Repository.new(owner_name: 'travis-ci', name: 'travis-ci') }
 
       before :each do
-        Travis.config.github.source_host = 'localhost'
+        Travis.config.github.stubs(:source_host).returns('localhost')
       end
 
       it 'returns the private git source url for a public repository' do
@@ -210,7 +210,8 @@ describe Repository do
      let(:repo) { Repository.new(owner_name: 'travis-ci', name: 'travis-ci', provider: 'stash') }
 
      before :each do
-       Travis.config.stash = { source_host: 'stash.example.com' }
+       Travis.config.stash.stubs(:source_host).returns('stash.example.com')
+       repo.private = true
      end
 
      it 'returns stash repository' do
