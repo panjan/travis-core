@@ -27,7 +27,7 @@ module Travis
           fail "we don't have a stash token for #{user.inspect}" if user.stash_oauth_token.blank?
           opts[:oauth] = {
             key: config.oauth.key,
-            secret: config.oauth.secret,
+            secret: File.read(config.oauth.secret_path),
             access_token: user.stash_oauth_token,
             access_token_secret: user.stash_oauth_token_secret
           }
