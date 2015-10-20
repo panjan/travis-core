@@ -59,7 +59,7 @@ class Job < Travis::Model
 
   validates :repository_id, :commit_id, :source_id, :source_type, :owner_id, :owner_type, presence: true
 
-  serialize :config
+  serialize :config, JSON
 
   delegate :request_id, to: :source # TODO denormalize
   delegate :pull_request?, to: :commit
@@ -77,6 +77,10 @@ class Job < Travis::Model
 
   after_commit on: :create do
     notify(:create)
+  end
+
+  def config
+    @config ||= (super || {}).deep_symbolize_keys
   end
 
   def propagate(name, *args)
@@ -100,6 +104,7 @@ class Job < Travis::Model
   end
 
   def config=(config)
+    @config = nil
     super normalize_config(config)
   end
 

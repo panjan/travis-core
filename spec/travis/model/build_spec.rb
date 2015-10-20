@@ -227,9 +227,9 @@ describe Build do
         build.config.should == { language: 'ruby', os: 'linux' }
       end
 
-      it 'deep_symbolizes keys on write' do
+      it 'read all config keys as symobls' do
         build = Factory(:build, config: { 'foo' => { 'bar' => 'bar' } })
-        build.read_attribute(:config)[:foo].should == { bar: 'bar' }
+        build.config[:foo].should == { bar: 'bar' }
       end
     end
 

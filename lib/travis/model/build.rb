@@ -56,7 +56,7 @@ class Build < Travis::Model
 
   validates :repository_id, :commit_id, :request_id, presence: true
 
-  serialize :config
+  serialize :config, JSON
 
   delegate :same_repo_pull_request?, :to => :request
 
@@ -178,7 +178,7 @@ class Build < Travis::Model
   end
 
   def config
-    @config ||= Config.new(super, multi_os: repository.multi_os_enabled?).normalize
+    @config ||= Config.new(super, multi_os: repository.try(:multi_os_enabled?)).normalize
   end
 
   def obfuscated_config
