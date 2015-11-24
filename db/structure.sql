@@ -771,6 +771,38 @@ ALTER SEQUENCE ssl_keys_id_seq OWNED BY ssl_keys.id;
 
 
 --
+-- Name: step_results; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE step_results (
+    id integer NOT NULL,
+    job_id integer,
+    data json,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: step_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE step_results_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: step_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE step_results_id_seq OWNED BY step_results.id;
+
+
+--
 -- Name: tokens; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1116,6 +1148,14 @@ ALTER TABLE ONLY requests
 
 ALTER TABLE ONLY ssl_keys
     ADD CONSTRAINT ssl_keys_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: step_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY step_results
+    ADD CONSTRAINT step_results_pkey PRIMARY KEY (id);
 
 
 --

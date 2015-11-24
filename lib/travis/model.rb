@@ -29,6 +29,7 @@ module Travis
     require 'travis/model/token'
     require 'travis/model/user'
     require 'travis/model/url'
+    require 'travis/model/step_result'
 
     self.abstract_class = true
 
