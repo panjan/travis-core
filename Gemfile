@@ -11,7 +11,7 @@ gem 'stash-client',       github: 'final-ci/stash-client'
 
 gem 'addressable'
 gem 'aws-sdk-v1'
-gem 'json', '~> 1.7.7'
+gem 'json', '~> 1.8.3'
 
 gem 'dalli'
 gem 'connection_pool'
