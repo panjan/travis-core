@@ -26,6 +26,7 @@ class Build
       event :receive, to: :received,  unless: [:received?, :started?, :failed?, :errored?]
       event :start,   to: :started,   unless: [:started?, :failed?, :errored?]
       event :finish,  to: :finished, if: :should_finish?
+      event :error,   to: :errored, if: :should_finish?
       event :reset,   to: :created
       event :cancel,  to: :canceled, if: :cancelable?
       event :all, after: [:denormalize, :notify]
@@ -50,6 +51,15 @@ class Build
 
       save!
     end
+
+    def error(data = {})
+      self.state = :errored
+      self.duration = matrix_duration
+      self.finished_at = data[:finished_at]
+
+      save!
+    end
+
 
     def cancel(options = {})
       matrix.each do |job|

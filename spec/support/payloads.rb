@@ -748,7 +748,13 @@ WORKER_PAYLOADS = {
   'job:test:log:2'   => { 'id' => 1, 'log' => 'full ' },
   'job:test:log:3'   => { 'id' => 1, 'log' => 'log'   },
   'job:test:finish'  => { 'id' => 1, 'state' => 'passed', 'finished_at' => '2011-01-01 00:03:00 +0200', 'log' => 'the full log' },
-  'job:test:reset'   => { 'id' => 1 }
+  'job:test:reset'   => { 'id' => 1 },
+
+  'build:test:receive' => { 'id' => 1, 'state' => 'received',  'received_at'  => '2011-01-01 00:02:00 +0200' },
+  'build:test:start'   => { 'id' => 1, 'state' => 'started',  'started_at'  => '2011-01-01 00:02:00 +0200' },
+  'build:test:error'  =>  { 'id' => 1, 'finished_at' => '2011-01-01 00:03:00 +0200' },
+  'build:test:reset'   => { 'id' => 1 }
+
 }
 
 WORKER_LEGACY_PAYLOADS = {
