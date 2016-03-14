@@ -38,6 +38,7 @@ end
 
 require 'travis/services/base'
 require 'travis/services/cancel_job'
+require 'travis/services/cancel_ddtf_build'
 require 'travis/services/cancel_build'
 require 'travis/services/delete_caches'
 require 'travis/services/fetch_config'

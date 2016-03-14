@@ -43,3 +43,5 @@ group :test do
   gem 'guard-rspec'
   gem 'rb-fsevent'
 end
+
+gem 'rake', '< 11.0'

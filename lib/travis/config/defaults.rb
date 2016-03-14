@@ -44,7 +44,8 @@ module Travis
             sentry:        { },
             services:      { find_requests: { max_limit: 100, default_limit: 25 } },
             settings:      { timeouts: { defaults: { hard_limit: 50, log_silence: 10 }, maximums: { hard_limit: 180, log_silence: 60 } } },
-            endpoints:     { }
+            endpoints:     { },
+            ddtf:          { command_node_queue: 'builds.windows.ussnode', cancel_command_prefix: 'cmd' }
 
     default :_access => [:key]
   end
