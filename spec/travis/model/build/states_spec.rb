@@ -244,6 +244,33 @@ describe Build::States do
           end
         end
       end
+
+      describe 'error' do
+        let(:data) { WORKER_PAYLOADS['build:test:error'] }
+        context 'when the build has already finished' do
+          before(:each) do
+            build.state = :passed
+          end
+
+          it 'does not notify observers' do
+            Travis::Event.expects(:dispatch).never
+            build.error(data)
+          end
+        end
+
+        context 'when the build is running' do
+          before(:each) do
+            build.state = :started
+            build.stubs(matrix_duration: 123)
+            build.expects(:save!)
+          end
+
+          it 'notifies observers' do
+            Travis::Event.expects(:dispatch).with('build:errored', build, data)
+            build.error(data)
+          end
+        end
+      end
     end
   end
 end

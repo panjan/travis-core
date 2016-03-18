@@ -26,7 +26,7 @@ class Build
       event :receive, to: :received,  unless: [:received?, :started?, :failed?, :errored?]
       event :start,   to: :started,   unless: [:started?, :failed?, :errored?]
       event :finish,  to: :finished, if: :should_finish?
-      event :error,   to: :errored, if: :should_finish?
+      event :error,   to: :errored, unless: :finished?
       event :reset,   to: :created
       event :cancel,  to: :canceled, if: :cancelable?
       event :all, after: [:denormalize, :notify]
