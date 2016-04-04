@@ -24,18 +24,17 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
--- Name: pg_trgm; Type: EXTENSION; Schema: -; Owner: -
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner: -
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: -
 --
 
-COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
-
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
 
 
 SET search_path = public, pg_catalog;
@@ -66,6 +65,24 @@ CREATE FUNCTION delete_log_part() RETURNS trigger
           RETURN OLD;
         END;
       $$;
+
+
+--
+-- Name: get_config_name(json); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION get_config_name(json) RETURNS text
+    LANGUAGE sql
+    AS $_$ select $1->> 'name'$_$;
+
+
+--
+-- Name: get_config_name(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION get_config_name(text) RETURNS text
+    LANGUAGE sql
+    AS $_$select $1$_$;
 
 
 --
@@ -205,40 +222,6 @@ ALTER SEQUENCE annotations_id_seq OWNED BY annotations.id;
 
 
 --
--- Name: branches; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE branches (
-    id integer NOT NULL,
-    repository_id integer NOT NULL,
-    last_build_id integer,
-    name character varying(255) NOT NULL,
-    exists_on_github boolean DEFAULT true NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: branches_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE branches_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: branches_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE branches_id_seq OWNED BY branches.id;
-
-
---
 -- Name: broadcasts; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -311,7 +294,13 @@ CREATE TABLE builds (
     branch character varying(255),
     canceled_at timestamp without time zone,
     cached_matrix_ids integer[],
-    received_at timestamp without time zone
+    received_at timestamp without time zone,
+    config_name character varying,
+    name character varying(255),
+    stopped_by_id integer,
+    stopped_by_type character varying(255),
+    build_info character varying(255),
+    proton_id bigint
 );
 
 
@@ -771,23 +760,27 @@ ALTER SEQUENCE ssl_keys_id_seq OWNED BY ssl_keys.id;
 
 
 --
--- Name: step_results; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: test_case_results; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE TABLE step_results (
+CREATE TABLE test_case_results (
     id integer NOT NULL,
-    job_id integer,
-    data json,
+    "position" integer,
+    job_id integer NOT NULL,
+    test_case_id integer NOT NULL,
+    duration integer,
+    failed_count integer,
+    success_count integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
 );
 
 
 --
--- Name: step_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: test_case_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE step_results_id_seq
+CREATE SEQUENCE test_case_results_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -796,10 +789,143 @@ CREATE SEQUENCE step_results_id_seq
 
 
 --
--- Name: step_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: test_case_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE step_results_id_seq OWNED BY step_results.id;
+ALTER SEQUENCE test_case_results_id_seq OWNED BY test_case_results.id;
+
+
+--
+-- Name: test_cases; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_cases (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_cases_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_cases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_cases_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_cases_id_seq OWNED BY test_cases.id;
+
+
+--
+-- Name: test_step_data; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_step_data (
+    id integer NOT NULL,
+    message text,
+    stdout text,
+    stderr text,
+    test_step_result_id integer NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_step_data_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_step_data_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_step_data_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_step_data_id_seq OWNED BY test_step_data.id;
+
+
+--
+-- Name: test_step_results; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_step_results (
+    id bigint NOT NULL,
+    test_case_result_id integer NOT NULL,
+    test_step_id integer NOT NULL,
+    result character varying(255) NOT NULL,
+    started_at timestamp without time zone,
+    duration integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    uuid uuid DEFAULT uuid_generate_v4()
+);
+
+
+--
+-- Name: test_step_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_step_results_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_step_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_step_results_id_seq OWNED BY test_step_results.id;
+
+
+--
+-- Name: test_steps; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_steps (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    test_case_id integer NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_steps_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE test_steps_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_steps_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE test_steps_id_seq OWNED BY test_steps.id;
 
 
 --
@@ -929,13 +1055,6 @@ ALTER TABLE ONLY annotations ALTER COLUMN id SET DEFAULT nextval('annotations_id
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY branches ALTER COLUMN id SET DEFAULT nextval('branches_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
 ALTER TABLE ONLY broadcasts ALTER COLUMN id SET DEFAULT nextval('broadcasts_id_seq'::regclass);
 
 
@@ -1013,6 +1132,41 @@ ALTER TABLE ONLY ssl_keys ALTER COLUMN id SET DEFAULT nextval('ssl_keys_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY test_case_results ALTER COLUMN id SET DEFAULT nextval('test_case_results_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_cases ALTER COLUMN id SET DEFAULT nextval('test_cases_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_step_data ALTER COLUMN id SET DEFAULT nextval('test_step_data_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_step_results ALTER COLUMN id SET DEFAULT nextval('test_step_results_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY test_steps ALTER COLUMN id SET DEFAULT nextval('test_steps_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY tokens ALTER COLUMN id SET DEFAULT nextval('tokens_id_seq'::regclass);
 
 
@@ -1044,14 +1198,6 @@ ALTER TABLE ONLY annotation_providers
 
 ALTER TABLE ONLY annotations
     ADD CONSTRAINT annotations_pkey PRIMARY KEY (id);
-
-
---
--- Name: branches_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY branches
-    ADD CONSTRAINT branches_pkey PRIMARY KEY (id);
 
 
 --
@@ -1151,19 +1297,51 @@ ALTER TABLE ONLY ssl_keys
 
 
 --
--- Name: step_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY step_results
-    ADD CONSTRAINT step_results_pkey PRIMARY KEY (id);
-
-
---
 -- Name: tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY jobs
     ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_case_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_case_results
+    ADD CONSTRAINT test_case_results_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_cases_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_cases
+    ADD CONSTRAINT test_cases_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_step_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_step_data
+    ADD CONSTRAINT test_step_data_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_step_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_step_results
+    ADD CONSTRAINT test_step_results_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_steps_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_steps
+    ADD CONSTRAINT test_steps_pkey PRIMARY KEY (id);
 
 
 --
@@ -1191,10 +1369,10 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: index_branches_on_repository_id_and_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: builds_expr_idx; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE UNIQUE INDEX index_branches_on_repository_id_and_name ON branches USING btree (repository_id, name);
+CREATE INDEX builds_expr_idx ON builds USING btree (((config ->> 'name'::text)));
 
 
 --
@@ -1384,6 +1562,48 @@ CREATE INDEX index_requests_on_repository_id ON requests USING btree (repository
 --
 
 CREATE INDEX index_ssl_key_on_repository_id ON ssl_keys USING btree (repository_id);
+
+
+--
+-- Name: index_test_case_results_on_job_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_case_results_on_job_id ON test_case_results USING btree (job_id);
+
+
+--
+-- Name: index_test_case_results_on_test_case_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_case_results_on_test_case_id ON test_case_results USING btree (test_case_id);
+
+
+--
+-- Name: index_test_step_data_on_test_step_result_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_step_data_on_test_step_result_id ON test_step_data USING btree (test_step_result_id);
+
+
+--
+-- Name: index_test_step_results_on_test_case_result_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_step_results_on_test_case_result_id ON test_step_results USING btree (test_case_result_id);
+
+
+--
+-- Name: index_test_step_results_on_test_step_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_step_results_on_test_step_id ON test_step_results USING btree (test_step_id);
+
+
+--
+-- Name: index_test_steps_on_test_case_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_steps_on_test_case_id ON test_steps USING btree (test_case_id);
 
 
 --
@@ -1699,3 +1919,25 @@ INSERT INTO schema_migrations (version) VALUES ('20150121135400');
 INSERT INTO schema_migrations (version) VALUES ('20150121135401');
 
 INSERT INTO schema_migrations (version) VALUES ('20150204144312');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501150710');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501150815');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501152049');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501152334');
+
+INSERT INTO schema_migrations (version) VALUES ('20150501152534');
+
+INSERT INTO schema_migrations (version) VALUES ('20150504150216');
+
+INSERT INTO schema_migrations (version) VALUES ('20150525085118');
+
+INSERT INTO schema_migrations (version) VALUES ('20150601101047');
+
+INSERT INTO schema_migrations (version) VALUES ('20151015144438');
+
+INSERT INTO schema_migrations (version) VALUES ('20151019170638');
+
+INSERT INTO schema_migrations (version) VALUES ('20160404104201');
