@@ -23,7 +23,7 @@ describe Travis::Services::CancelDdtfBuild do
       it 'should cancel the build if it\'s cancelable with empty job matrix' do
         publisher = mock('publisher')
         service.stubs(:publisher).returns(publisher)
-        publisher.expects(:publish).with({ stopped_by: user.login }.to_json)
+        publisher.expects(:publish).with(stopped_by: user.login)
 
         expect {
           service.run
@@ -43,7 +43,7 @@ describe Travis::Services::CancelDdtfBuild do
 
         publisher = mock('publisher')
         service.stubs(:publisher).returns(publisher)
-        publisher.expects(:publish).with({ stopped_by: user.login }.to_json)
+        publisher.expects(:publish).with(stopped_by: user.login)
 
         expect {
           service.run
