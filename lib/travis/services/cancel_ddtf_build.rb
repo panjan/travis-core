@@ -41,7 +41,7 @@ module Travis
       end
 
       def publish!
-        publisher.publish({ stopped_by: current_user.login }.to_json)
+        publisher.publish(stopped_by: current_user.login)
       end
 
       def publisher
