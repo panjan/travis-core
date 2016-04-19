@@ -34,6 +34,11 @@ describe Build do
     build.should_not be_cancelable
   end
 
+  it 'is cancelable if jobs are empty' do
+    build = Factory.build(:build, matrix: [])
+    build.should be_cancelable
+  end
+
   describe '#secure_env_enabled?' do
     it 'returns true if we\'re not dealing with pull request' do
       build = Factory.build(:build)

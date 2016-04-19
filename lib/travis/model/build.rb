@@ -187,6 +187,7 @@ class Build < Travis::Model
   end
 
   def cancelable?
+    return true if matrix.empty?
     matrix.any? { |job| job.cancelable? }
   end
 
