@@ -753,9 +753,8 @@ WORKER_PAYLOADS = {
   'build:test:receive' => { 'id' => 1, 'state' => 'received',  'received_at'  => '2011-01-01 00:02:00 +0200' },
   'build:test:start'   => { 'id' => 1, 'state' => 'started',  'started_at'  => '2011-01-01 00:02:00 +0200' },
   'build:test:error'  =>  { 'id' => 1, 'finished_at' => '2011-01-01 00:03:00 +0200' },
-  'build:test:reset'   => { 'id' => 1 },
+  'build:test:reset'   => { 'id' => 1 }
 
-  'build:test:message'   => { 'id' => 1 , 'position' => '1', 'message' => 'test', 'timestamp' => '2011-01-01 00:03:00 +0200' }
 }
 
 WORKER_LEGACY_PAYLOADS = {
