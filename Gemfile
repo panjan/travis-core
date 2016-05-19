@@ -9,6 +9,8 @@ gem 'sidekiq-status',     github: 'utgarda/sidekiq-status', ref: 'e77d5dc2ea0a24
 gem 'gh',                 github: 'final-ci/gh'
 gem 'stash-client',       github: 'final-ci/stash-client'
 
+gem 'sidekiq',  '=4.1.1'
+
 gem 'addressable'
 gem 'aws-sdk-v1'
 gem 'json', '~> 1.8.3'

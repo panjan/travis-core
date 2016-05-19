@@ -30,6 +30,7 @@ module Travis
     require 'travis/model/user'
     require 'travis/model/url'
     require 'travis/model/step_result'
+    require 'travis/model/execution_log'
 
     self.abstract_class = true
 

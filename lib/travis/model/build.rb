@@ -54,6 +54,7 @@ class Build < Travis::Model
   belongs_to :stopped_by, polymorphic: true
   has_many   :matrix, as: :source, order: :id, class_name: 'Job::Test', dependent: :destroy
   has_many   :events, as: :source
+  has_many   :execution_logs
 
   validates :repository_id, :commit_id, :request_id, presence: true
 
